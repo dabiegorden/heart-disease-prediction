@@ -40,10 +40,18 @@ export default function ModelsComparison({
   predictions,
   inputData,
 }: ModelsComparisonProps) {
+  const isDeepLearningModel = (modelName: string) => {
+    return (
+      modelName.toLowerCase().includes("cnn") ||
+      modelName.toLowerCase().includes("lstm")
+    );
+  };
+
   const modelMetrics = Object.entries(predictions.predictions)
     .filter(([_, data]) => !("error" in data))
     .map(([modelName, data]) => ({
       model: modelName.replace(/_/g, " ").toUpperCase(),
+      originalName: modelName,
       accuracy: (data as PredictionResult).metrics.accuracy * 100,
       precision: (data as PredictionResult).metrics.precision * 100,
       recall: (data as PredictionResult).metrics.recall * 100,
@@ -165,6 +173,9 @@ export default function ModelsComparison({
                 <th className="text-left py-3 px-4 text-slate-400 font-medium">
                   Model
                 </th>
+                <th className="text-left py-3 px-4 text-slate-400 font-medium">
+                  Type
+                </th>
                 <th className="text-right py-3 px-4 text-slate-400 font-medium">
                   Accuracy
                 </th>
@@ -191,6 +202,17 @@ export default function ModelsComparison({
                   <td className="py-3 px-4 font-medium text-slate-200">
                     {model.model}
                   </td>
+                  <td className="py-3 px-4">
+                    <span
+                      className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                        isDeepLearningModel(model.originalName)
+                          ? "bg-purple-500/20 text-purple-300"
+                          : "bg-blue-500/20 text-blue-300"
+                      }`}
+                    >
+                      {isDeepLearningModel(model.originalName) ? "DL" : "ML"}
+                    </span>
+                  </td>
                   <td className="py-3 px-4 text-right text-slate-300">
                     {model.accuracy.toFixed(1)}%
                   </td>
@@ -201,12 +223,7 @@ export default function ModelsComparison({
                     {model.recall.toFixed(1)}%
                   </td>
                   <td className="py-3 px-4 text-right text-slate-300">
-                    {(
-                      Object.values(predictions.predictions).find(
-                        (p) => !("error" in p)
-                      )!.metrics.f1 * 100
-                    ).toFixed(1)}
-                    %
+                    {model.f1.toFixed(1)}%
                   </td>
                   <td className="py-3 px-4 text-right text-slate-300">
                     {model.auc.toFixed(1)}%

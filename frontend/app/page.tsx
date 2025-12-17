@@ -28,10 +28,10 @@ export default function Home() {
       }
 
       console.log(
-        "[v0] Sending prediction request to:",
+        "Sending prediction request to:",
         `${apiUrl}/api/predict/compare`
       );
-      console.log("[v0] Features:", features);
+      console.log("Features:", features);
 
       const response = await fetch(`${apiUrl}/api/predict/compare`, {
         method: "POST",
@@ -41,21 +41,21 @@ export default function Home() {
         body: JSON.stringify({ features }),
       });
 
-      console.log("[v0] Response status:", response.status);
+      console.log("Response status:", response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("[v0] Response error:", errorText);
+        console.error("Response error:", errorText);
         throw new Error(`Failed to get predictions: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("[v0] Prediction data received:", data);
+      console.log("Prediction data received:", data);
       setPredictions(data);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "An error occurred";
-      console.error("[v0] Prediction error:", errorMessage);
+      console.error("Prediction error:", errorMessage);
       setError(errorMessage);
       setPredictions(null);
     } finally {

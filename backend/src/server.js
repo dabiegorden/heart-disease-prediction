@@ -19,9 +19,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ---------------------------------------------------------
-// Middleware
-// ---------------------------------------------------------
+/* ============================================================
+ * MIDDLEWARE
+ * ============================================================ */
 app.use(morgan("dev"));
 app.use(
   cors({
@@ -33,9 +33,9 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// ---------------------------------------------------------
-// Initialize ONNX Models
-// ---------------------------------------------------------
+/* ============================================================
+ * MODEL INITIALIZATION
+ * ============================================================ */
 const modelsPath =
   process.env.MODELS_PATH || path.join(__dirname, "../src/models");
 
@@ -45,28 +45,27 @@ let modelsReady = false;
 async function initializeModels() {
   console.log("🚀 Initializing ONNX model loader...");
 
-  await modelLoader.loadAllModels();
+  const loaded = await modelLoader.loadAllModels();
   modelLoader.loadMetrics();
   modelLoader.loadScaler();
 
-  const loadedModels = modelLoader.getAvailableModels();
+  const models = modelLoader.getAvailableModels();
 
-  if (loadedModels.length === 0) {
-    console.error("❌ No ONNX models found — prediction endpoints will fail.");
+  if (!loaded || models.length === 0) {
+    console.error("❌ No ONNX models loaded — predictions will fail.");
   } else {
-    console.log(`✓ Loaded ${loadedModels.length} ONNX models:`, loadedModels);
+    console.log(`✓ Loaded ${models.length} models:`, models);
   }
 
   modelsReady = true;
-
-  console.log("✓ All models & scaler initialized.\n");
+  console.log("✓ Model initialization complete.\n");
 }
 
 await initializeModels();
 
-// ---------------------------------------------------------
-// Health Check Endpoint
-// ---------------------------------------------------------
+/* ============================================================
+ * HEALTH CHECK
+ * ============================================================ */
 app.get("/health", (req, res) => {
   res.json({
     status: modelsReady ? "ok" : "initializing",
@@ -77,20 +76,27 @@ app.get("/health", (req, res) => {
   });
 });
 
-// ---------------------------------------------------------
-// Prediction API Routes
-// ---------------------------------------------------------
+/* ============================================================
+ * PREDICTION ROUTES
+ * ============================================================ */
 app.use("/api/predict", createPredictRouter(modelLoader));
 
-// ---------------------------------------------------------
-// API Information Endpoint
-// ---------------------------------------------------------
+/* ============================================================
+ * API INFO
+ * ============================================================ */
 app.get("/api/info", (req, res) => {
+  const models = modelLoader.getAvailableModels();
+
+  const modelDetails = models.map((name) => ({
+    name,
+    type: name.includes("cnn") ? "deep-learning" : "machine-learning",
+  }));
+
   res.json({
     name: "Heart Disease Prediction API",
-    version: "1.0.0",
-    models: modelLoader.getAvailableModels(),
-    features: 12,
+    version: "1.1.0",
+    models: modelDetails,
+    featureCount: 12,
     featureNames: [
       "age",
       "sex",
@@ -108,9 +114,9 @@ app.get("/api/info", (req, res) => {
   });
 });
 
-// ---------------------------------------------------------
-// 404 Handler
-// ---------------------------------------------------------
+/* ============================================================
+ * 404 HANDLER
+ * ============================================================ */
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -119,25 +125,22 @@ app.use((req, res) => {
   });
 });
 
-// ---------------------------------------------------------
-// Global Error Handler
-// ---------------------------------------------------------
+/* ============================================================
+ * GLOBAL ERROR HANDLER
+ * ============================================================ */
 app.use(errorHandler);
 
-// ---------------------------------------------------------
-// Start Server
-// ---------------------------------------------------------
+/* ============================================================
+ * START SERVER
+ * ============================================================ */
 app.listen(PORT, () => {
-  const loadedCount = modelLoader.getAvailableModels().length;
-  const scalerStatus = modelLoader.scalerStats ? "Yes" : "No";
-
   console.log(`
 ╔══════════════════════════════════════════════════╗
 ║   🏥 HEART DISEASE PREDICTION API
 ║
-║   ➤ Server Running: http://localhost:${PORT}
-║   ➤ Models Loaded: ${loadedCount}
-║   ➤ Scaler Loaded: ${scalerStatus}
+║   ➤ Server: http://localhost:${PORT}
+║   ➤ Models Loaded: ${modelLoader.getAvailableModels().length}
+║   ➤ Scaler Loaded: ${modelLoader.scalerStats ? "Yes" : "No"}
 ║
 ╚══════════════════════════════════════════════════╝
 `);

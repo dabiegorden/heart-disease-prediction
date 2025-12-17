@@ -1,3 +1,5 @@
+"use client";
+
 export default function Header() {
   return (
     <header className="border-b border-slate-800/50 bg-slate-950/50 backdrop-blur-sm sticky top-0 z-50">
@@ -11,8 +13,8 @@ export default function Header() {
           </p>
         </div>
         <div className="text-right text-sm text-slate-400">
-          <p>Powered by 6 ML Models</p>
-          <p className="text-xs mt-1">Real-time Predictions</p>
+          <p>Powered by 7 AI Models</p>
+          <p className="text-xs mt-1">5 ML + 2 Deep Learning</p>
         </div>
       </div>
     </header>

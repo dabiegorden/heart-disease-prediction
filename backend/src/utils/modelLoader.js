@@ -5,6 +5,38 @@ import * as ort from "onnxruntime-node";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+/**
+ * Models that require 3D input: [1, 1, features]
+ */
+const DEEP_MODELS = new Set(["cnn", "cnn_lstm"]);
+
+/* ============================================================
+ * SAFE SERIALIZER (BigInt + TypedArray → JSON-safe)
+ * ============================================================ */
+function serialize(value) {
+  if (typeof value === "bigint") {
+    return Number(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(serialize);
+  }
+
+  if (ArrayBuffer.isView(value)) {
+    return Array.from(value, serialize);
+  }
+
+  if (value && typeof value === "object") {
+    const obj = {};
+    for (const key in value) {
+      obj[key] = serialize(value[key]);
+    }
+    return obj;
+  }
+
+  return value;
+}
+
 class ModelLoader {
   constructor(modelsPath) {
     this.modelsPath = modelsPath;
@@ -13,9 +45,9 @@ class ModelLoader {
     this.scalerStats = null;
   }
 
-  /**
-   * Load ONNX models
-   */
+  /* ============================================================
+   * LOAD ALL ONNX MODELS
+   * ============================================================ */
   async loadAllModels() {
     try {
       const modelFiles = fs
@@ -31,88 +63,69 @@ class ModelLoader {
         try {
           const session = await ort.InferenceSession.create(modelPath);
           this.models.set(modelName, session);
-
           console.log(`  ✓ Loaded: ${modelName}`);
         } catch (err) {
           console.error(`  ✗ Failed to load ${modelName}: ${err.message}`);
         }
       }
 
-      console.log(`\n✓ Successfully loaded ${this.models.size} models`);
+      console.log(`\n✓ Loaded ${this.models.size} models`);
       return true;
     } catch (err) {
-      console.error("❌ Failed to load models:", err);
+      console.error("❌ Model loading failed:", err);
       return false;
     }
   }
 
-  /**
-   * Load model metrics
-   */
+  /* ============================================================
+   * LOAD METRICS
+   * ============================================================ */
   loadMetrics() {
-    const metricsFile = path.join(this.modelsPath, "model_metrics.json");
+    const file = path.join(this.modelsPath, "model_metrics.json");
 
-    if (!fs.existsSync(metricsFile)) {
-      console.warn("⚠ No model_metrics.json found");
+    if (!fs.existsSync(file)) {
+      console.warn("⚠ model_metrics.json not found");
       return null;
     }
 
-    try {
-      this.metrics = JSON.parse(fs.readFileSync(metricsFile, "utf-8"));
-      console.log("✓ Model metrics loaded");
-      return this.metrics;
-    } catch (err) {
-      console.warn("⚠ Error loading metrics:", err.message);
-      return null;
-    }
+    this.metrics = JSON.parse(fs.readFileSync(file, "utf-8"));
+    console.log("✓ Model metrics loaded");
+    return this.metrics;
   }
 
-  /**
-   * Load StandardScaler stats
-   */
+  /* ============================================================
+   * LOAD SCALER
+   * ============================================================ */
   loadScaler() {
-    const scalerFile = path.join(this.modelsPath, "scaler.json");
+    const file = path.join(this.modelsPath, "scaler.json");
 
-    if (!fs.existsSync(scalerFile)) {
-      console.warn("⚠ No scaler.json found — using raw input");
+    if (!fs.existsSync(file)) {
+      console.warn("⚠ scaler.json not found");
       return null;
     }
 
-    try {
-      this.scalerStats = JSON.parse(fs.readFileSync(scalerFile, "utf-8"));
-      console.log("✓ Scaler stats loaded");
-      return this.scalerStats;
-    } catch (err) {
-      console.error("❌ Failed to load scaler:", err.message);
-      return null;
-    }
+    this.scalerStats = JSON.parse(fs.readFileSync(file, "utf-8"));
+    console.log("✓ Scaler loaded");
+    return this.scalerStats;
   }
 
-  /**
-   * Apply StandardScaler transform
-   */
+  /* ============================================================
+   * APPLY STANDARD SCALER
+   * ============================================================ */
   applyScaling(features) {
     if (!this.scalerStats) return features;
 
     const { mean, scale } = this.scalerStats;
-
-    return features.map((value, index) => {
-      const m = mean[index];
-      const s = scale[index] || 1;
-      return (value - m) / s;
-    });
+    return features.map((v, i) => (v - mean[i]) / (scale[i] || 1));
   }
 
-  /**
-   * Return available ONNX model names
-   */
+  /* ============================================================
+   * METADATA
+   * ============================================================ */
   getAvailableModels() {
     return Array.from(this.models.keys());
   }
 
-  /**
-   * Return metrics for one model
-   */
   getMetrics(modelName) {
     return this.metrics?.[modelName] || null;
   }
@@ -121,51 +134,56 @@ class ModelLoader {
     return this.metrics || {};
   }
 
-  /**
-   * Predict using a loaded ONNX model
-   */
+  /* ============================================================
+   * RUN PREDICTION (ML + DL)
+   * ============================================================ */
   async predict(modelName, features) {
     const session = this.models.get(modelName);
-
     if (!session) {
       throw new Error(`Model not found: ${modelName}`);
     }
 
     try {
-      // Convert inputs
-      const numeric = features.map((v) => Number(v));
+      const numeric = features.map(Number);
       const scaled = this.applyScaling(numeric);
 
-      // Create input tensor
       const inputName = session.inputNames[0];
-      const tensor = new ort.Tensor("float32", Float32Array.from(scaled), [
-        1,
-        scaled.length,
-      ]);
 
-      // Run inference
+      const inputShape = DEEP_MODELS.has(modelName)
+        ? [1, 1, scaled.length] // CNN / CNN-LSTM
+        : [1, scaled.length]; // Traditional ML
+
+      const tensor = new ort.Tensor(
+        "float32",
+        Float32Array.from(scaled),
+        inputShape
+      );
+
       const outputs = await session.run({ [inputName]: tensor });
 
-      // Extract prediction
-      if (!outputs["label"]) {
-        throw new Error(`ONNX output missing 'label' for model ${modelName}`);
+      const outputKey = Object.keys(outputs)[0];
+      const rawData = outputs[outputKey].data;
+
+      let prediction = null;
+      let probability = null;
+
+      if (rawData.length === 1) {
+        probability = Number(rawData[0]);
+        prediction = probability >= 0.5 ? 1 : 0;
+      } else if (rawData.length >= 2) {
+        probability = Number(rawData[1]);
+        prediction = probability >= 0.5 ? 1 : 0;
       }
 
-      const prediction = Number(outputs["label"].data[0]);
-
-      // Extract probability tensor if available
-      const probability = outputs["probabilities"]
-        ? Array.from(outputs["probabilities"].data)
-        : null;
-
-      return {
+      return serialize({
         model: modelName,
         prediction,
         probability,
-        rawOutputs: Object.keys(outputs),
-      };
+        rawOutput: rawData,
+        inputShape,
+      });
     } catch (err) {
-      throw new Error(`Inference failed for ${modelName}: ${err.message}`);
+      throw new Error(`Inference failed (${modelName}): ${err.message}`);
     }
   }
 }

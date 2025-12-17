@@ -1,0 +1,462 @@
+
+pytorch	2.9.1+cpu:â¿
+“	
+input
+conv.0.weight
+conv.0.biasconv1dnode_conv1d"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@†*
+strides@†*
+pads@@†Jó
+	namespaceâ: deep_learning_models.CNN1D/conv: torch.nn.modules.container.Sequential/conv.0: torch.nn.modules.conv.Conv1d/conv1d: aten.conv1d.defaultJ†
+pkg.torch.onnx.class_hierarchy~['deep_learning_models.CNN1D', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.conv.Conv1d', 'aten.conv1d.default']JÆ
+pkg.torch.onnx.fx_nodeì%conv1d : [num_users=1] = call_function[target=torch.ops.aten.conv1d.default](args = (%x, %p_conv_0_weight, %p_conv_0_bias, [1], [1]), kwargs = {})J>
+pkg.torch.onnx.name_scopes ['', 'conv', 'conv.0', 'conv1d']Jç
+pkg.torch.onnx.stack_traceÓFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 33, in forward
+    x = self.conv(x)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\container.py", line 250, in forward
+    input = module(input)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\conv.py", line 371, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+´
+conv1drelu	node_relu"ReluJó
+	namespaceâ: deep_learning_models.CNN1D/conv: torch.nn.modules.container.Sequential/conv.1: torch.nn.modules.activation.ReLU/relu: aten.relu.defaultJ£
+pkg.torch.onnx.class_hierarchyÄ['deep_learning_models.CNN1D', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']JÉ
+pkg.torch.onnx.fx_nodei%relu : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%conv1d,), kwargs = {})J<
+pkg.torch.onnx.name_scopes['', 'conv', 'conv.1', 'relu']JÖ
+pkg.torch.onnx.stack_traceÊFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 33, in forward
+    x = self.conv(x)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\container.py", line 250, in forward
+    input = module(input)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\activation.py", line 144, in forward
+    return F.relu(input, inplace=self.inplace)
+Ÿ
+relu
+conv.2.weight
+conv.2.bias
+conv.2.running_mean
+conv.2.running_vargetitem,node__native_batch_norm_legit_no_training__0"BatchNormalization*
+epsilon¨≈'7†*
+momentumfff?†J›
+	namespaceœ: deep_learning_models.CNN1D/conv: torch.nn.modules.container.Sequential/conv.2: torch.nn.modules.batchnorm.BatchNorm1d/_native_batch_norm_legit_no_training: aten._native_batch_norm_legit_no_training.defaultJ…
+pkg.torch.onnx.class_hierarchy¶['deep_learning_models.CNN1D', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm1d', 'aten._native_batch_norm_legit_no_training.default']Jû
+pkg.torch.onnx.fx_nodeÉ%_native_batch_norm_legit_no_training : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%relu, %p_conv_2_weight, %p_conv_2_bias, %b_conv_2_running_mean, %b_conv_2_running_var, 0.1, 1e-05), kwargs = {})J\
+pkg.torch.onnx.name_scopes>['', 'conv', 'conv.2', '_native_batch_norm_legit_no_training']JÓ
+pkg.torch.onnx.stack_traceœFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 33, in forward
+    x = self.conv(x)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\container.py", line 250, in forward
+    input = module(input)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\batchnorm.py", line 193, in forward
+    return F.batch_norm(
+‰	
+getitem
+conv.3.weight
+conv.3.biasconv1d_1node_conv1d_1"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@†*
+strides@†*
+pads@@†Jô
+	namespaceã: deep_learning_models.CNN1D/conv: torch.nn.modules.container.Sequential/conv.3: torch.nn.modules.conv.Conv1d/conv1d_1: aten.conv1d.defaultJ†
+pkg.torch.onnx.class_hierarchy~['deep_learning_models.CNN1D', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.conv.Conv1d', 'aten.conv1d.default']J∂
+pkg.torch.onnx.fx_nodeõ%conv1d_1 : [num_users=1] = call_function[target=torch.ops.aten.conv1d.default](args = (%getitem, %p_conv_3_weight, %p_conv_3_bias, [1], [1]), kwargs = {})J@
+pkg.torch.onnx.name_scopes"['', 'conv', 'conv.3', 'conv1d_1']Jç
+pkg.torch.onnx.stack_traceÓFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 33, in forward
+    x = self.conv(x)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\container.py", line 250, in forward
+    input = module(input)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\conv.py", line 371, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+π
+conv1d_1relu_1node_relu_1"ReluJô
+	namespaceã: deep_learning_models.CNN1D/conv: torch.nn.modules.container.Sequential/conv.4: torch.nn.modules.activation.ReLU/relu_1: aten.relu.defaultJ£
+pkg.torch.onnx.class_hierarchyÄ['deep_learning_models.CNN1D', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Já
+pkg.torch.onnx.fx_nodem%relu_1 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%conv1d_1,), kwargs = {})J>
+pkg.torch.onnx.name_scopes ['', 'conv', 'conv.4', 'relu_1']JÖ
+pkg.torch.onnx.stack_traceÊFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 33, in forward
+    x = self.conv(x)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\container.py", line 250, in forward
+    input = module(input)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\activation.py", line 144, in forward
+    return F.relu(input, inplace=self.inplace)
+Á
+relu_1
+conv.5.weight
+conv.5.bias
+conv.5.running_mean
+conv.5.running_var	getitem_3.node__native_batch_norm_legit_no_training_1__0"BatchNormalization*
+epsilon¨≈'7†*
+momentumfff?†Jﬂ
+	namespace—: deep_learning_models.CNN1D/conv: torch.nn.modules.container.Sequential/conv.5: torch.nn.modules.batchnorm.BatchNorm1d/_native_batch_norm_legit_no_training_1: aten._native_batch_norm_legit_no_training.defaultJ…
+pkg.torch.onnx.class_hierarchy¶['deep_learning_models.CNN1D', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm1d', 'aten._native_batch_norm_legit_no_training.default']J¢
+pkg.torch.onnx.fx_nodeá%_native_batch_norm_legit_no_training_1 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%relu_1, %p_conv_5_weight, %p_conv_5_bias, %b_conv_5_running_mean, %b_conv_5_running_var, 0.1, 1e-05), kwargs = {})J^
+pkg.torch.onnx.name_scopes@['', 'conv', 'conv.5', '_native_batch_norm_legit_no_training_1']JÓ
+pkg.torch.onnx.stack_traceœFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 33, in forward
+    x = self.conv(x)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\container.py", line 250, in forward
+    input = module(input)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\batchnorm.py", line 193, in forward
+    return F.batch_norm(
+Ü	
+	getitem_3
+val_10	unsqueezenode_unsqueeze"	UnsqueezeJ´
+	namespaceù: deep_learning_models.CNN1D/conv: torch.nn.modules.container.Sequential/conv.6: torch.nn.modules.pooling.AdaptiveAvgPool1d/unsqueeze: aten.unsqueeze.defaultJ≤
+pkg.torch.onnx.class_hierarchyè['deep_learning_models.CNN1D', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.pooling.AdaptiveAvgPool1d', 'aten.unsqueeze.default']Jì
+pkg.torch.onnx.fx_nodey%unsqueeze : [num_users=1] = call_function[target=torch.ops.aten.unsqueeze.default](args = (%getitem_3, -2), kwargs = {})JA
+pkg.torch.onnx.name_scopes#['', 'conv', 'conv.6', 'unsqueeze']Jé
+pkg.torch.onnx.stack_traceÔFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 33, in forward
+    x = self.conv(x)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\container.py", line 250, in forward
+    input = module(input)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\pooling.py", line 1460, in forward
+    return F.adaptive_avg_pool1d(input, self.output_size)
+ç	
+	unsqueeze
+val_13mean	node_mean"
+ReduceMean*
+keepdims†*
+noop_with_empty_axes †Jù
+	namespaceè: deep_learning_models.CNN1D/conv: torch.nn.modules.container.Sequential/conv.6: torch.nn.modules.pooling.AdaptiveAvgPool1d/mean: aten.mean.dimJ©
+pkg.torch.onnx.class_hierarchyÜ['deep_learning_models.CNN1D', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.pooling.AdaptiveAvgPool1d', 'aten.mean.dim']Jë
+pkg.torch.onnx.fx_nodew%mean : [num_users=1] = call_function[target=torch.ops.aten.mean.dim](args = (%unsqueeze, [-1, -2], True), kwargs = {})J<
+pkg.torch.onnx.name_scopes['', 'conv', 'conv.6', 'mean']Jé
+pkg.torch.onnx.stack_traceÔFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 33, in forward
+    x = self.conv(x)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\container.py", line 250, in forward
+    input = module(input)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\pooling.py", line 1460, in forward
+    return F.adaptive_avg_pool1d(input, self.output_size)
+ﬁ
+mean
+val_10squeezenode_squeeze"SqueezeJ£
+	namespaceï: deep_learning_models.CNN1D/conv: torch.nn.modules.container.Sequential/conv.6: torch.nn.modules.pooling.AdaptiveAvgPool1d/squeeze: aten.squeeze.dimJ¨
+pkg.torch.onnx.class_hierarchyâ['deep_learning_models.CNN1D', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.pooling.AdaptiveAvgPool1d', 'aten.squeeze.dim']JÜ
+pkg.torch.onnx.fx_nodel%squeeze : [num_users=1] = call_function[target=torch.ops.aten.squeeze.dim](args = (%mean, -2), kwargs = {})J?
+pkg.torch.onnx.name_scopes!['', 'conv', 'conv.6', 'squeeze']Jé
+pkg.torch.onnx.stack_traceÔFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 33, in forward
+    x = self.conv(x)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\container.py", line 250, in forward
+    input = module(input)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\pooling.py", line 1460, in forward
+    return F.adaptive_avg_pool1d(input, self.output_size)
+Õ
+squeeze
+val_17view	node_view"Reshape*
+	allowzero†JA
+	namespace4: deep_learning_models.CNN1D/view: aten.view.defaultJU
+pkg.torch.onnx.class_hierarchy3['deep_learning_models.CNN1D', 'aten.view.default']Jå
+pkg.torch.onnx.fx_noder%view : [num_users=1] = call_function[target=torch.ops.aten.view.default](args = (%squeeze, [1, -1]), kwargs = {})J*
+pkg.torch.onnx.name_scopes['', 'view']J∏
+pkg.torch.onnx.stack_traceôFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 34, in forward
+    x = x.view(x.size(0), -1)
+°	
+view
+fc.0.weight
+	fc.0.biaslinearnode_linear"Gemm*
+transA †*
+transB†*
+alpha  Ä?†*
+beta  Ä?†Jï
+	namespaceá: deep_learning_models.CNN1D/fc: torch.nn.modules.container.Sequential/fc.0: torch.nn.modules.linear.Linear/linear: aten.linear.defaultJ£
+pkg.torch.onnx.class_hierarchyÄ['deep_learning_models.CNN1D', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.linear.Linear', 'aten.linear.default']J£
+pkg.torch.onnx.fx_nodeà%linear : [num_users=1] = call_function[target=torch.ops.aten.linear.default](args = (%view, %p_fc_0_weight, %p_fc_0_bias), kwargs = {})J:
+pkg.torch.onnx.name_scopes['', 'fc', 'fc.0', 'linear']JÜ
+pkg.torch.onnx.stack_traceÁFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 35, in forward
+    return self.fc(x)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\container.py", line 250, in forward
+    input = module(input)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\linear.py", line 134, in forward
+    return F.linear(input, self.weight, self.bias)
+Æ
+linearrelu_2node_relu_2"ReluJï
+	namespaceá: deep_learning_models.CNN1D/fc: torch.nn.modules.container.Sequential/fc.1: torch.nn.modules.activation.ReLU/relu_2: aten.relu.defaultJ£
+pkg.torch.onnx.class_hierarchyÄ['deep_learning_models.CNN1D', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']JÖ
+pkg.torch.onnx.fx_nodek%relu_2 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%linear,), kwargs = {})J:
+pkg.torch.onnx.name_scopes['', 'fc', 'fc.1', 'relu_2']JÜ
+pkg.torch.onnx.stack_traceÁFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 35, in forward
+    return self.fc(x)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\container.py", line 250, in forward
+    input = module(input)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\activation.py", line 144, in forward
+    return F.relu(input, inplace=self.inplace)
+Æ	
+relu_2
+fc.3.weight
+	fc.3.biaslinear_1node_linear_1"Gemm*
+transA †*
+transB†*
+alpha  Ä?†*
+beta  Ä?†Jó
+	namespaceâ: deep_learning_models.CNN1D/fc: torch.nn.modules.container.Sequential/fc.3: torch.nn.modules.linear.Linear/linear_1: aten.linear.defaultJ£
+pkg.torch.onnx.class_hierarchyÄ['deep_learning_models.CNN1D', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.linear.Linear', 'aten.linear.default']J¶
+pkg.torch.onnx.fx_nodeã%linear_1 : [num_users=1] = call_function[target=torch.ops.aten.linear.default](args = (%clone, %p_fc_3_weight, %p_fc_3_bias), kwargs = {})J<
+pkg.torch.onnx.name_scopes['', 'fc', 'fc.3', 'linear_1']JÜ
+pkg.torch.onnx.stack_traceÁFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 35, in forward
+    return self.fc(x)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\container.py", line 250, in forward
+    input = module(input)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\linear.py", line 134, in forward
+    return F.linear(input, self.weight, self.bias)
+π
+linear_1outputnode_sigmoid"SigmoidJú
+	namespaceé: deep_learning_models.CNN1D/fc: torch.nn.modules.container.Sequential/fc.4: torch.nn.modules.activation.Sigmoid/sigmoid: aten.sigmoid.defaultJ©
+pkg.torch.onnx.class_hierarchyÜ['deep_learning_models.CNN1D', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.Sigmoid', 'aten.sigmoid.default']Jã
+pkg.torch.onnx.fx_nodeq%sigmoid : [num_users=1] = call_function[target=torch.ops.aten.sigmoid.default](args = (%linear_1,), kwargs = {})J;
+pkg.torch.onnx.name_scopes['', 'fc', 'fc.4', 'sigmoid']J˜
+pkg.torch.onnx.stack_traceÿFile "C:\Users\dabie\OneDrive\Desktop\heart-disease-prediction\model_training\deep_learning_models.py", line 35, in forward
+    return self.fc(x)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\container.py", line 250, in forward
+    input = module(input)
+  File "C:\Users\dabie\AppData\Local\Programs\Python\Python313\Lib\site-packages\torch\nn\modules\activation.py", line 359, in forward
+    return torch.sigmoid(input)
+main_graph*P Bconv.0.weightj
+locationcnn.onnx.dataj
+offset0j
+length384p*î Bconv.0.biasJÄ;Ω|Ω0∞Åænæ=Ú.?˚‘≥æ2äæ¶]Üæ√Z§æ*óæDΩæn•ıæDùë>Duæ>†{>$Ïø⁄G>·›¶>∑‹Q>˚ﬂ‹>j€≥æÇ+?+–æ◊Í¡>6”“>ï@á=2ø”÷U>|'>;áﬂ>Îøä∑ˆΩ˜ú∏>*ñ Bconv.2.weightJÄ¢≥Ü?küf?ç˚}?khG?âáà?íåÄ?ÚWÇ?äqÅ?I-â?å˙ê?√òu?-ñÑ?ÛÌq?é"~?ÉÌÇ?êr?.^Ü?¸†Ñ?5∏j?"Ny?ızc?“ÿÉ?¶öV?≥XY?•s?·gy?gÊ^?€p?)b?gé?ìÄb?œ{?*î Bconv.2.biasJÄj˘;t›j>òjÅ=$ß4>éÿw>8>¡ÓRæ'√º¥Ø@Ωîõ©>%=ı¨c>≥Œi=I‰Ÿ=D}UæÄŒ◊ºp`[>”kÌ=w◊>¥ƒΩ”⁄=Bn•>Ày>d"ºù¸o>∂á=I:†ºW√ÚΩÒÃ=≈®P>§Iæ“∞Bæ*U@ Bconv.3.weightj
+locationcnn.onnx.dataj
+offset8576j
+length24576p*î@Bconv.3.biasJÄSÅ˝=–ö;+∫2æ»®æñ"√Ω—;ºwπææêÊ=Â>k√Ì=ç˘Ω‡Ï¿ΩªQæ<\Ø=ñlÃ<©U>m]fæ†æì¸ æ˝ßÙ=4·-æGN(>Å>[◊;æ^õ‡=µo8Ω†“@=¨kˆ=-z(>Uæ0Yi>8E$=]ã&<∏ÍTΩ∫	¶=±ı∑Ω‡˘D>ÍÌpºÒ=•‘>r|5<˜e æ+”ÕΩ@`=ôq"ª°<8:A=˙PP=M.mΩ¸ù≤ΩÂ‰ûºñä=&WBæ™o>y∂lªkÛUΩ≠\æJQcæQS#ΩÙæ±ÕÛΩßí°=≤ÿ=Ωÿ‹Ω*ñ@Bconv.5.weightJÄ(èù?®(ö?á∂ï?m
+å?,„í?ÿ	ô?õ?AIã?ú∞ï?˙Åñ?ä?v¿í?ÌKò?°]ô?»ì?˚ö?¥—ù?Pfâ?n=ß?∫ò?+£?Òé?@)í?ª¨?Qü?Úæû?UDä?%.ï?ë? Úó?	≤Ö?Hz¢?h_ó?9	°?û?;ãõ?…ì?Í(ï?:0ç?J]ô?*å?≥yô?KÜ•?Û¶û? \ï?∏ò?Ωç?û?^≠?ó“ñ?ı‰â?…Ùë?D9Æ?ßì?Ò„é?#‘ö?Ω√ú?vÑû?JÏÖ?•Ãí?˛òñ?5ú?·^ë?º«®?*î@Bconv.5.biasJÄÄ∆$ΩudÌ=ˆs}ΩÅ"îΩ˚ØΩß◊∏ΩãTΩ(~æhÒıºZ∞≈º†—›ΩÃ€“ºaÙÇΩUıΩ∑4—=¢ª)Ωò¢ÿΩÀ£æ∏ñèªì«YΩ_L,æ œÙ<Ë∏;πìûªí˚†<=Ÿ=<…oº÷Lπ=âÅ=n¨{ºnDãΩùæ;ÇA&=∂á=c~Õ<B; <§Åà<l<lzΩDw´<|⁄Ÿ<fì<‚@=|4<Œå=õ⁄Ç=èìΩ;ñ√<Z9<À%ÀΩÁ¨4=˜ÇÅº[¥=∂Íµº?!ˆΩ\9MΩç?=B>ç<i˙ø=â}Ì<e1Ω∑ˆ=†”ºÜf9Ω*O @Bfc.0.weightj
+locationcnn.onnx.dataj
+offset384j
+length8192p*í B	fc.0.biasJÄ6eQ>˘ÙI=eDΩ∂¥:"CŒ<`
+>" >ïç@>ñ˜7>iﬁ«<MÄì=ÉD%>pE>T}->‚Ê>ﬂè=N1'>éA`=\¡=c&>fb=4≤Ω„z“ºùj=J>ï}>ÿ´>¯œo=€ï_ª¬F>)g\>Eπ™º*ñ Bfc.3.weightJÄ
+›à>Íùç>öÉõæ–∂>Hvìæm£æDΩ>'à¶æ±7îæê>º5Ñæ◊®>
+|ãæÜËàæ∑ëë>p$¢>CCåæZÉ≤>–Fæ˚™Ö>ì∫>¥†æ[Ã•>ÕﬂÇæ~¶ãæ™•zæmèæìµ>Pó¨>3%êæÈOêæó™{æ*B	fc.3.biasJé)‹=*ú Bconv.2.running_meanJÄ)]E>T21>∞îì>jÌ/?°7>MÜ>qË->é=>ú°=Øn!=B±=¶À>b ?˛¥>‹¸=ºfØ>*$?˜ƒ∏>ΩÓ>îÚ.>S??*Ó»<v<ﬁ>øîÒ>áÓ+>…m‚=«Õ¶>sì¿>ªv?N9+=f\j>◊hË>*õ Bconv.2.running_varJÄ1¬=¶ûÕ=>=>â≠ >>{l>˛Ü±=µ◊<Ù<4<≤I=≈‹'>Å÷´>¸¸1>∏k<y:>-5™>\ñK>N/>	Ò=Ò>¢®€;åS>Ä≈K>©_R=E™î=4“>ï≥@>ò%à>◊5|<íx>#|E>*ú@Bconv.5.running_meanJÄc•y>4{À>|Q>ÜWÅ=û~ô>ÍVg>∞Ëê<JãÛ>?kÒ>Â˘ ?ñÏn>ås€=“ƒ)=xT?T’ ?$x≥>LZﬁ=Hıø>ÒÔ#=[ı?∏˘t=3[û>tÛ©>È˘)==ùÍ>!π=˝Á¨>∫]∑>ò:Û>ÍƒG>QÛ˝>>
+«…>pX>ãõ¢>^$B>1cË>;?úõ>§fÒ>∆<ë>v^º=1≠=6O
+?æÊ>ôn»>F>y(í>2π⁄=Êl≥=‹û¡>Î{¿>Üí÷=™Œ>®¸=∏⁄4>≈?7>{∑<£0ø>^]x>!>ÇÙË>À⁄>œ
+	>*õ@Bconv.5.running_varJÄ9•⁄=)o>tfÑ=Tñ=kœq>ê2–=%“∂;ÓÀœ>†)ñ>PÛ∏>ÊÛ->ô5f=≤®Y<0ıÔ>,∏?í]ò>§f=\Ó∂>q÷¶<¢JÁ>Õ<C≤->:l?>DBv<H€>~∆~=Í8K>7á>í¡ó>òd>R©ñ>ÃÑb=%Hà>Ù@>i;> Ø€=rüt>>ú?b&E>ÊÙÊ>ŸÑj>º=~¸+=õ?Ön€> â>ú√ê=l>=P!=æ4=hú>3∑Å>Ô-=*Óò>HÜg=Âº‹=µ∞±=ñ:<&¶£>áj >´ˇ‡=œ≤>4ä=≈z=*Bval_13Jˇˇˇˇˇˇˇˇ˛ˇˇˇˇˇˇˇ*Bval_17J       ˇˇˇˇˇˇˇˇ*Bval_10J˛ˇˇˇˇˇˇˇZ¡
+input
+
+
+
+"=
+/pkg.torch.export.graph_signature.InputSpec.kind
+USER_INPUT"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"&
+!pkg.torch.onnx.original_node_namexbá
+output
+
+
+"?
+0pkg.torch.export.graph_signature.OutputSpec.kindUSER_OUTPUT",
+!pkg.torch.onnx.original_node_namesigmoidj÷
+conv.0.weight
+
+ 
+
+"<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"4
+!pkg.torch.onnx.original_node_namep_conv_0_weightj 
+conv.0.bias
+
+
+ "<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"2
+!pkg.torch.onnx.original_node_namep_conv_0_biasjŒ
+conv.2.weight
+
+
+ "<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"4
+!pkg.torch.onnx.original_node_namep_conv_2_weightj 
+conv.2.bias
+
+
+ "<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"2
+!pkg.torch.onnx.original_node_namep_conv_2_biasj÷
+conv.3.weight
+
+@
+ 
+"<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"4
+!pkg.torch.onnx.original_node_namep_conv_3_weightj 
+conv.3.bias
+
+
+@"<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"2
+!pkg.torch.onnx.original_node_namep_conv_3_biasjŒ
+conv.5.weight
+
+
+@"<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"4
+!pkg.torch.onnx.original_node_namep_conv_5_weightj 
+conv.5.bias
+
+
+@"<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"2
+!pkg.torch.onnx.original_node_namep_conv_5_biasjŒ
+fc.0.weight
+
+ 
+@"<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"2
+!pkg.torch.onnx.original_node_namep_fc_0_weightj∆
+	fc.0.bias
+
+
+ "<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"0
+!pkg.torch.onnx.original_node_namep_fc_0_biasjŒ
+fc.3.weight
+
+
+ "<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"2
+!pkg.torch.onnx.original_node_namep_fc_3_weightj∆
+	fc.3.bias
+
+
+"<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"0
+!pkg.torch.onnx.original_node_namep_fc_3_biasj◊
+conv.2.running_mean
+
+
+ "9
+/pkg.torch.export.graph_signature.InputSpec.kindBUFFER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentTrue":
+!pkg.torch.onnx.original_node_nameb_conv_2_running_meanj’
+conv.2.running_var
+
+
+ "9
+/pkg.torch.export.graph_signature.InputSpec.kindBUFFER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentTrue"9
+!pkg.torch.onnx.original_node_nameb_conv_2_running_varj◊
+conv.5.running_mean
+
+
+@"9
+/pkg.torch.export.graph_signature.InputSpec.kindBUFFER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentTrue":
+!pkg.torch.onnx.original_node_nameb_conv_5_running_meanj’
+conv.5.running_var
+
+
+@"9
+/pkg.torch.export.graph_signature.InputSpec.kindBUFFER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentTrue"9
+!pkg.torch.onnx.original_node_nameb_conv_5_running_varjR
+val_13
+
+
+"<
+$pkg.onnxscript.optimizer.folded_from['val_11', 'val_12']jR
+val_17
+
+
+"<
+$pkg.onnxscript.optimizer.folded_from['val_15', 'val_16']j
+val_10
+
+
+j
+conv1d
+
+
+ 
+j
+relu
+
+
+ 
+j
+getitem
+
+
+ 
+j
+conv1d_1
+
+
+@
+j
+relu_1
+
+
+@
+j
+	getitem_3
+
+
+@
+j#
+	unsqueeze
+
+
+@
+
+j
+mean
+
+
+@
+
+j
+squeeze
+
+
+@
+j
+view
+
+
+@j
+linear
+
+
+ j
+relu_2
+
+
+ j
+linear_1
+
+
+Ç˜
+0pkg.torch.export.ExportedProgram.graph_signature¬
+# inputs
+p_conv_0_weight: PARAMETER target='conv.0.weight'
+p_conv_0_bias: PARAMETER target='conv.0.bias'
+p_conv_2_weight: PARAMETER target='conv.2.weight'
+p_conv_2_bias: PARAMETER target='conv.2.bias'
+p_conv_3_weight: PARAMETER target='conv.3.weight'
+p_conv_3_bias: PARAMETER target='conv.3.bias'
+p_conv_5_weight: PARAMETER target='conv.5.weight'
+p_conv_5_bias: PARAMETER target='conv.5.bias'
+p_fc_0_weight: PARAMETER target='fc.0.weight'
+p_fc_0_bias: PARAMETER target='fc.0.bias'
+p_fc_3_weight: PARAMETER target='fc.3.weight'
+p_fc_3_bias: PARAMETER target='fc.3.bias'
+b_conv_2_running_mean: BUFFER target='conv.2.running_mean' persistent=True
+b_conv_2_running_var: BUFFER target='conv.2.running_var' persistent=True
+b_conv_2_num_batches_tracked: BUFFER target='conv.2.num_batches_tracked' persistent=True
+b_conv_5_running_mean: BUFFER target='conv.5.running_mean' persistent=True
+b_conv_5_running_var: BUFFER target='conv.5.running_var' persistent=True
+b_conv_5_num_batches_tracked: BUFFER target='conv.5.num_batches_tracked' persistent=True
+x: USER_INPUT
+
+# outputs
+sigmoid: USER_OUTPUT
+Ç8
+2pkg.torch.export.ExportedProgram.range_constraints{}B
+ 

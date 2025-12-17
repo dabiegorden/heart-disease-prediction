@@ -24,15 +24,22 @@ interface ResultsDashboardProps {
 export default function ResultsDashboard({
   predictions,
 }: ResultsDashboardProps) {
+  const isDeepLearningModel = (modelName: string) => {
+    return (
+      modelName.toLowerCase().includes("cnn") ||
+      modelName.toLowerCase().includes("lstm")
+    );
+  };
+
   const modelPredictions = Object.entries(predictions.predictions)
     .filter(([_, data]) => !("error" in data))
     .map(([modelName, data]) => ({
       modelName: modelName.replace(/_/g, " ").toUpperCase(),
+      originalName: modelName,
       ...(data as PredictionResult),
     }));
 
   const riskCount = modelPredictions.filter((m) => m.prediction === 1).length;
-  const consensusRisk = riskCount > modelPredictions.length / 2;
 
   const getRiskLevel = (riskCount: number, total: number) => {
     const percentage = (riskCount / total) * 100;
@@ -81,9 +88,22 @@ export default function ResultsDashboard({
           >
             <div className="space-y-4">
               <div className="flex items-start justify-between">
-                <h3 className="font-semibold text-slate-100">
-                  {model.modelName}
-                </h3>
+                <div>
+                  <h3 className="font-semibold text-slate-100">
+                    {model.modelName}
+                  </h3>
+                  <span
+                    className={`inline-block mt-1 px-2 py-0.5 rounded text-xs font-medium ${
+                      isDeepLearningModel(model.originalName)
+                        ? "bg-purple-500/20 text-purple-300"
+                        : "bg-blue-500/20 text-blue-300"
+                    }`}
+                  >
+                    {isDeepLearningModel(model.originalName)
+                      ? "Deep Learning"
+                      : "Machine Learning"}
+                  </span>
+                </div>
                 <div
                   className={`px-3 py-1 rounded-full text-xs font-bold ${
                     model.prediction === 1
