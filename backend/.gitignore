@@ -1,2 +1,22 @@
 node_modules/
 .env*
+
+# Runtime data directories
+data/
+uploads/
+models/retrained/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db

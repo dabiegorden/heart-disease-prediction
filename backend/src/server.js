@@ -12,6 +12,8 @@ import dotenv from "dotenv";
 import ModelLoader from "./utils/modelLoader.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { createPredictRouter } from "./routes/predict.js";
+import federatedRouter from "./routes/federated.js";
+import createRetrainRouter from "./routes/retrain.js";
 
 dotenv.config();
 
@@ -80,6 +82,8 @@ app.get("/health", (req, res) => {
  * PREDICTION ROUTES
  * ============================================================ */
 app.use("/api/predict", createPredictRouter(modelLoader));
+app.use("/api/federated", federatedRouter);
+app.use("/api/retrain", createRetrainRouter());
 
 /* ============================================================
  * API INFO

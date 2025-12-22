@@ -36,10 +36,7 @@ interface ModelsComparisonProps {
   inputData: number[];
 }
 
-export default function ModelsComparison({
-  predictions,
-  inputData,
-}: ModelsComparisonProps) {
+export default function ModelsComparison({ predictions }: ModelsComparisonProps) {
   const isDeepLearningModel = (modelName: string) => {
     return (
       modelName.toLowerCase().includes("cnn") ||

@@ -1,89 +1,66 @@
 "use client";
 
-import {
-  Header,
-  ModelsComparison,
-  PredictionForm,
-  ResultsDashboard,
-} from "@/constants";
 import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PredictionProvider } from "@/components/prediction-context";
+import { PredictionTab } from "@/components/prediction-tab";
+import { FederatedLearningTab } from "@/components/federated-learning-tab";
+
+function Header() {
+  return (
+    <header className="border-b border-slate-800/50 bg-slate-950/50 backdrop-blur-sm sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-400 via-cyan-400 to-blue-500">
+            CardioPredict AI
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Federated Learning Clinical Heart Disease Risk Assessment
+          </p>
+        </div>
+        <div className="text-right text-sm text-slate-400">
+          <p>Powered by 7 AI Models</p>
+          <p className="text-xs mt-1">5 ML + 2 Deep Learning</p>
+        </div>
+      </div>
+    </header>
+  );
+}
 
 export default function Home() {
-  const [predictions, setPredictions] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [inputData, setInputData] = useState<number[] | null>(null);
-
-  const handlePredict = async (features: number[]) => {
-    setLoading(true);
-    setError(null);
-    setInputData(features);
-
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!apiUrl) {
-        throw new Error(
-          "API URL not configured. Set NEXT_PUBLIC_API_URL environment variable."
-        );
-      }
-
-      console.log(
-        "Sending prediction request to:",
-        `${apiUrl}/api/predict/compare`
-      );
-      console.log("Features:", features);
-
-      const response = await fetch(`${apiUrl}/api/predict/compare`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ features }),
-      });
-
-      console.log("Response status:", response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Response error:", errorText);
-        throw new Error(`Failed to get predictions: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Prediction data received:", data);
-      setPredictions(data);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An error occurred";
-      console.error("Prediction error:", errorMessage);
-      setError(errorMessage);
-      setPredictions(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [activeTab, setActiveTab] = useState("prediction");
 
   return (
-    <main className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
-      <Header />
+    <PredictionProvider>
+      <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
+        <Header />
+        <main className="max-w-7xl mx-auto px-4 py-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2 bg-slate-900/50 border border-slate-800/50 mb-8">
+              <TabsTrigger
+                value="prediction"
+                className="data-[state=active]:bg-cyan-500/20 text-white data-[state=active]:text-cyan-300"
+              >
+                Prediction
+              </TabsTrigger>
+              <TabsTrigger
+                value="federated"
+                className="data-[state=active]:bg-cyan-500/20 text-white data-[state=active]:text-cyan-300"
+              >
+                Model Training
+              </TabsTrigger>
+            </TabsList>
 
-      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-        <PredictionForm onPredict={handlePredict} loading={loading} />
+            <TabsContent value="prediction">
+              <PredictionTab />
+            </TabsContent>
 
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-red-200">
-            <p className="font-semibold">Error</p>
-            <p className="text-sm">{error}</p>
-          </div>
-        )}
-
-        {predictions && inputData && (
-          <>
-            <ResultsDashboard predictions={predictions} />
-            <ModelsComparison predictions={predictions} inputData={inputData} />
-          </>
-        )}
+            <TabsContent value="federated">
+              <FederatedLearningTab />
+            </TabsContent>
+          </Tabs>
+        </main>
       </div>
-    </main>
+    </PredictionProvider>
   );
 }

@@ -1,0 +1,49 @@
+{
+  "num_clients": 3,
+  "iid": true,
+  "balance": true,
+  "alpha": 0.5,
+  "test_size": 0.2,
+  "random_state": 42,
+  "client_stats": [
+    {
+      "client_id": 0,
+      "train_samples": 79,
+      "test_samples": 20,
+      "train_class_dist": [
+        47,
+        32
+      ],
+      "test_class_dist": [
+        13,
+        7
+      ]
+    },
+    {
+      "client_id": 1,
+      "train_samples": 79,
+      "test_samples": 20,
+      "train_class_dist": [
+        40,
+        39
+      ],
+      "test_class_dist": [
+        8,
+        12
+      ]
+    },
+    {
+      "client_id": 2,
+      "train_samples": 79,
+      "test_samples": 20,
+      "train_class_dist": [
+        41,
+        38
+      ],
+      "test_class_dist": [
+        11,
+        9
+      ]
+    }
+  ]
+}
