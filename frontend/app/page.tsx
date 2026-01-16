@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PredictionProvider } from "@/components/prediction-context";
 import { PredictionTab } from "@/components/prediction-tab";
 import { FederatedLearningTab } from "@/components/federated-learning-tab";
+import { ExplainableAITab } from "@/components/explainable-ai-tab";
 
 function Header() {
   return (
@@ -36,7 +37,7 @@ export default function Home() {
         <Header />
         <main className="max-w-7xl mx-auto px-4 py-8">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 bg-slate-900/50 border border-slate-800/50 mb-8">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-900/50 border border-slate-800/50 mb-8">
               <TabsTrigger
                 value="prediction"
                 className="data-[state=active]:bg-cyan-500/20 text-white data-[state=active]:text-cyan-300"
@@ -49,6 +50,12 @@ export default function Home() {
               >
                 Model Training
               </TabsTrigger>
+              <TabsTrigger
+                value="explainable-ai"
+                className="data-[state=active]:bg-cyan-500/20 text-white data-[state=active]:text-cyan-300"
+              >
+                Explainable AI
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="prediction">
@@ -57,6 +64,10 @@ export default function Home() {
 
             <TabsContent value="federated">
               <FederatedLearningTab />
+            </TabsContent>
+
+            <TabsContent value="explainable-ai">
+              <ExplainableAITab />
             </TabsContent>
           </Tabs>
         </main>

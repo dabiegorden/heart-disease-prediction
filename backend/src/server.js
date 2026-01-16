@@ -14,6 +14,8 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import { createPredictRouter } from "./routes/predict.js";
 import federatedRouter from "./routes/federated.js";
 import createRetrainRouter from "./routes/retrain.js";
+import explainableAIRouter from "./routes/explainable-ai.js";
+import { connectDB } from "./config/mongodb.js";
 
 dotenv.config();
 
@@ -84,6 +86,7 @@ app.get("/health", (req, res) => {
 app.use("/api/predict", createPredictRouter(modelLoader));
 app.use("/api/federated", federatedRouter);
 app.use("/api/retrain", createRetrainRouter());
+app.use("/api/explainable-ai", explainableAIRouter);
 
 /* ============================================================
  * API INFO
@@ -137,7 +140,8 @@ app.use(errorHandler);
 /* ============================================================
  * START SERVER
  * ============================================================ */
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
+  await connectDB();
   console.log(`
 ╔══════════════════════════════════════════════════╗
 ║   🏥 HEART DISEASE PREDICTION API
