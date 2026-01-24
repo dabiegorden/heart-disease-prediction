@@ -81,7 +81,7 @@ export function ExplainableAIChat({
             probability,
             modelName,
           }),
-        }
+        },
       );
 
       const data = await response.json();

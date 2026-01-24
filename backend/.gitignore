@@ -2,7 +2,6 @@ node_modules/
 .env*
 
 # Runtime data directories
-data/
 uploads/
 models/retrained/
 

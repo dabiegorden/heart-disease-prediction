@@ -102,7 +102,7 @@ export default function PredictionForm({
   loading: boolean;
 }) {
   const [values, setValues] = useState<Record<string, number | string>>(
-    FEATURES.reduce((acc, f) => ({ ...acc, [f.id]: "" }), {})
+    FEATURES.reduce((acc, f) => ({ ...acc, [f.id]: "" }), {}),
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
 

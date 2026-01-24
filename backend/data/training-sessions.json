@@ -1,0 +1,25 @@
+{
+  "1769202633699": {
+    "sessionId": "1769202633699",
+    "modelType": "logistic_regression",
+    "status": "training",
+    "startTime": "2026-01-23T21:10:33.700Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1769202633676-622664750.csv",
+    "progress": 10,
+    "currentMessage": "Initializing...",
+    "metrics": null,
+    "error": null
+  },
+  "1769203337807": {
+    "sessionId": "1769203337807",
+    "modelType": "all",
+    "status": "training",
+    "startTime": "2026-01-23T21:22:17.807Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1769203337795-620978060.csv",
+    "progress": 0,
+    "currentMessage": "Training logistic_regression...",
+    "currentModel": "logistic_regression",
+    "results": {},
+    "error": null
+  }
+}

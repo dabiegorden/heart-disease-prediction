@@ -120,7 +120,7 @@ ${formatMetricsContext(metrics, allMetrics)}`;
         details: error.message,
       });
     }
-  })
+  }),
 );
 
 /**
@@ -170,7 +170,7 @@ router.post(
         details: error.message,
       });
     }
-  })
+  }),
 );
 
 /**
@@ -223,7 +223,7 @@ router.post(
         details: error.message,
       });
     }
-  })
+  }),
 );
 
 export default router;

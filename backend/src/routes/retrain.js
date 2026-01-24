@@ -115,7 +115,7 @@ export default function createRetrainRouter() {
         return res.status(400).json({
           success: false,
           error: `Invalid model type. Must be one of: ${validModels.join(
-            ", "
+            ", ",
           )}`,
         });
       }
@@ -179,7 +179,7 @@ export default function createRetrainRouter() {
 
         const lines = result.stdout.split("\n");
         const completeIdx = lines.findIndex((line) =>
-          line.includes("=== TRAINING COMPLETE ===")
+          line.includes("=== TRAINING COMPLETE ==="),
         );
 
         if (completeIdx !== -1) {
@@ -197,7 +197,7 @@ export default function createRetrainRouter() {
 
           console.log(
             `[v0] Training completed for ${modelType}:`,
-            trainingResult.metrics
+            trainingResult.metrics,
           );
         } else {
           throw new Error("Training completed but no results found");
@@ -218,7 +218,7 @@ export default function createRetrainRouter() {
           console.warn(`[v0] Failed to delete uploaded file: ${dataPath}`);
         }
       }
-    })
+    }),
   );
 
   /* ============================================================
@@ -286,7 +286,7 @@ export default function createRetrainRouter() {
           console.log(
             `[v0] Training ${modelType} (${completedCount + 1}/${
               models.length
-            })`
+            })`,
           );
 
           const args = [
@@ -312,7 +312,7 @@ export default function createRetrainRouter() {
 
           const lines = result.stdout.split("\n");
           const completeIdx = lines.findIndex((line) =>
-            line.includes("=== TRAINING COMPLETE ===")
+            line.includes("=== TRAINING COMPLETE ==="),
           );
 
           if (completeIdx !== -1) {
@@ -354,7 +354,7 @@ export default function createRetrainRouter() {
       }
 
       console.log(`[v0] All models training completed`);
-    })
+    }),
   );
 
   /* ============================================================
@@ -379,7 +379,7 @@ export default function createRetrainRouter() {
         success: true,
         session,
       });
-    })
+    }),
   );
 
   /* ============================================================
@@ -400,7 +400,7 @@ export default function createRetrainRouter() {
         completed: completed.length,
         sessions: completed,
       });
-    })
+    }),
   );
 
   /* ============================================================
@@ -425,7 +425,7 @@ export default function createRetrainRouter() {
           error: "Session not found",
         });
       }
-    })
+    }),
   );
 
   return router;

@@ -28,12 +28,12 @@ interface PredictionContextType {
 }
 
 const PredictionContext = createContext<PredictionContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function PredictionProvider({ children }: { children: ReactNode }) {
   const [predictions, setPredictionsState] = useState<PredictionData | null>(
-    null
+    null,
   );
   const [inputData, setInputDataState] = useState<number[] | null>(null);
 
@@ -83,7 +83,7 @@ export function usePredictionContext() {
   const context = useContext(PredictionContext);
   if (context === undefined) {
     throw new Error(
-      "usePredictionContext must be used within a PredictionProvider"
+      "usePredictionContext must be used within a PredictionProvider",
     );
   }
   return context;

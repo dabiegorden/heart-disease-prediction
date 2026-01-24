@@ -23,7 +23,7 @@ export function createPredictRouter(modelLoader) {
     }
 
     const invalid = features.some(
-      (v) => v === null || v === undefined || isNaN(Number(v))
+      (v) => v === null || v === undefined || isNaN(Number(v)),
     );
 
     if (invalid) {
@@ -45,7 +45,7 @@ export function createPredictRouter(modelLoader) {
         models: modelLoader.getAvailableModels(),
         metrics: modelLoader.getAllMetrics(),
       });
-    })
+    }),
   );
 
   /* ============================================================
@@ -89,7 +89,7 @@ export function createPredictRouter(modelLoader) {
         modelCount: models.length,
         predictions,
       });
-    })
+    }),
   );
 
   /* ============================================================
@@ -136,7 +136,7 @@ export function createPredictRouter(modelLoader) {
           error: err.message,
         });
       }
-    })
+    }),
   );
 
   return router;
