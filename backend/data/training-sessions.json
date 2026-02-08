@@ -21,5 +21,186 @@
     "currentModel": "logistic_regression",
     "results": {},
     "error": null
+  },
+  "1770582907517": {
+    "sessionId": "1770582907517",
+    "modelType": "logistic_regression",
+    "status": "training",
+    "startTime": "2026-02-08T20:35:07.517Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1770582907503-352240332.csv",
+    "progress": 10,
+    "currentMessage": "Initializing...",
+    "metrics": null,
+    "error": null
+  },
+  "1770586850971": {
+    "sessionId": "1770586850971",
+    "modelType": "logistic_regression",
+    "status": "training",
+    "startTime": "2026-02-08T21:40:50.971Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1770586850952-717614160.csv",
+    "progress": 0,
+    "currentMessage": "Initializing...",
+    "metrics": null,
+    "error": null
+  },
+  "1770587219692": {
+    "sessionId": "1770587219692",
+    "modelType": "logistic_regression",
+    "status": "training",
+    "startTime": "2026-02-08T21:46:59.692Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1770587219675-476725033.csv",
+    "progress": 0,
+    "currentMessage": "Initializing...",
+    "metrics": null,
+    "error": null
+  },
+  "1770587649061": {
+    "sessionId": "1770587649061",
+    "modelType": "logistic_regression",
+    "status": "completed",
+    "startTime": "2026-02-08T21:54:09.061Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1770587649036-957423674.csv",
+    "progress": 100,
+    "currentMessage": "Training completed!",
+    "metrics": {
+      "accuracy": 0.965,
+      "precision": 0.9661016949152542,
+      "recall": 0.9743589743589743,
+      "f1_score": 0.9702127659574468,
+      "auc_roc": 0.9963958397693338
+    },
+    "error": null,
+    "endTime": "2026-02-08T21:54:19.482Z"
+  },
+  "1770587673728": {
+    "sessionId": "1770587673728",
+    "modelType": "svm",
+    "status": "completed",
+    "startTime": "2026-02-08T21:54:33.728Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1770587673723-327857343.csv",
+    "progress": 100,
+    "currentMessage": "Training completed!",
+    "metrics": {
+      "accuracy": 0.985,
+      "precision": 0.9830508474576272,
+      "recall": 0.9914529914529915,
+      "f1_score": 0.9872340425531915,
+      "auc_roc": 0.9978375038616003
+    },
+    "error": null,
+    "endTime": "2026-02-08T21:54:40.240Z"
+  },
+  "1770587690204": {
+    "sessionId": "1770587690204",
+    "modelType": "all",
+    "status": "completed",
+    "startTime": "2026-02-08T21:54:50.205Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1770587690200-540226003.csv",
+    "progress": 100,
+    "currentMessage": "All models trained!",
+    "currentModel": "cnn_lstm",
+    "results": {
+      "logistic_regression": {
+        "accuracy": 0.965,
+        "precision": 0.9661016949152542,
+        "recall": 0.9743589743589743,
+        "f1_score": 0.9702127659574468,
+        "auc_roc": 0.9963958397693338
+      },
+      "svm": {
+        "accuracy": 0.985,
+        "precision": 0.9830508474576272,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9872340425531915,
+        "auc_roc": 0.9978375038616003
+      },
+      "gradient_boost": {
+        "accuracy": 0.975,
+        "precision": 0.9827586206896551,
+        "recall": 0.9743589743589743,
+        "f1_score": 0.9785407725321889,
+        "auc_roc": 0.9981464318813716
+      },
+      "knn": {
+        "accuracy": 0.955,
+        "precision": 0.9736842105263158,
+        "recall": 0.9487179487179487,
+        "f1_score": 0.961038961038961,
+        "auc_roc": 0.9852744310575636
+      },
+      "cnn1d": {
+        "accuracy": 0.99,
+        "precision": 0.9914529914529915,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9914529914529915,
+        "auc_roc": 0.9993821439604572
+      },
+      "cnn_lstm": {
+        "accuracy": 0.975,
+        "precision": 0.9745762711864406,
+        "recall": 0.9829059829059829,
+        "f1_score": 0.9787234042553191,
+        "auc_roc": 0.9976315518484192
+      }
+    },
+    "error": null,
+    "endTime": "2026-02-08T21:55:56.129Z"
+  },
+  "1770587968915": {
+    "sessionId": "1770587968915",
+    "modelType": "all",
+    "status": "completed",
+    "startTime": "2026-02-08T21:59:28.915Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1770587968904-77026342.csv",
+    "progress": 100,
+    "currentMessage": "All models trained!",
+    "currentModel": "cnn_lstm",
+    "results": {
+      "logistic_regression": {
+        "accuracy": 0.965,
+        "precision": 0.9661016949152542,
+        "recall": 0.9743589743589743,
+        "f1_score": 0.9702127659574468,
+        "auc_roc": 0.9963958397693338
+      },
+      "svm": {
+        "accuracy": 0.985,
+        "precision": 0.9830508474576272,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9872340425531915,
+        "auc_roc": 0.9978375038616003
+      },
+      "gradient_boost": {
+        "accuracy": 0.975,
+        "precision": 0.9827586206896551,
+        "recall": 0.9743589743589743,
+        "f1_score": 0.9785407725321889,
+        "auc_roc": 0.9981464318813716
+      },
+      "knn": {
+        "accuracy": 0.955,
+        "precision": 0.9736842105263158,
+        "recall": 0.9487179487179487,
+        "f1_score": 0.961038961038961,
+        "auc_roc": 0.9852744310575636
+      },
+      "cnn1d": {
+        "accuracy": 0.98,
+        "precision": 0.991304347826087,
+        "recall": 0.9743589743589743,
+        "f1_score": 0.9827586206896551,
+        "auc_roc": 0.9994851199670476
+      },
+      "cnn_lstm": {
+        "accuracy": 0.985,
+        "precision": 0.9830508474576272,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9872340425531915,
+        "auc_roc": 0.9974255998352385
+      }
+    },
+    "error": null,
+    "endTime": "2026-02-08T22:00:56.059Z"
   }
 }
