@@ -1,3 +1,16 @@
+/**
+ * utils/modelLoader.js
+ * ====================
+ * Loads all ONNX models and applies the scaler produced by the Python
+ * training pipeline.
+ *
+ * Key change from the original
+ * ----------------------------
+ * The Python preprocessor now saves `feature_names` inside scaler.json.
+ * The loader reads that list so it always knows the correct feature order
+ * and count – even after retraining on a dataset with different columns.
+ */
+
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -5,172 +18,186 @@ import * as ort from "onnxruntime-node";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-/**
- * Models that require 3D input: [1, 1, features]
- */
+/** Models that need a 3-D input tensor  [batch, 1, features] */
 const DEEP_MODELS = new Set(["cnn", "cnn_lstm"]);
 
 /* ============================================================
- * SAFE SERIALIZER (BigInt + TypedArray → JSON-safe)
+ * SAFE SERIALIZER  (BigInt + TypedArray → plain JSON values)
  * ============================================================ */
 function serialize(value) {
-  if (typeof value === "bigint") {
-    return Number(value);
-  }
-
-  if (Array.isArray(value)) {
-    return value.map(serialize);
-  }
-
-  if (ArrayBuffer.isView(value)) {
-    return Array.from(value, serialize);
-  }
-
+  if (typeof value === "bigint") return Number(value);
+  if (Array.isArray(value)) return value.map(serialize);
+  if (ArrayBuffer.isView(value)) return Array.from(value, serialize);
   if (value && typeof value === "object") {
-    const obj = {};
-    for (const key in value) {
-      obj[key] = serialize(value[key]);
-    }
-    return obj;
+    const out = {};
+    for (const k in value) out[k] = serialize(value[k]);
+    return out;
   }
-
   return value;
 }
 
+/* ============================================================
+ * MODEL LOADER
+ * ============================================================ */
 class ModelLoader {
   constructor(modelsPath) {
     this.modelsPath = modelsPath;
-    this.models = new Map();
-    this.metrics = null;
-    this.scalerStats = null;
+    this.models = new Map(); // modelName → InferenceSession
+    this.metrics = null; // model_metrics.json contents
+    this.scalerStats = null; // scaler.json contents
   }
 
-  /* ============================================================
-   * LOAD ALL ONNX MODELS
-   * ============================================================ */
+  /* ----------------------------------------------------------
+   * Load all .onnx files in modelsPath
+   * ---------------------------------------------------------- */
   async loadAllModels() {
     try {
-      const modelFiles = fs
+      const onnxFiles = fs
         .readdirSync(this.modelsPath)
-        .filter((file) => file.endsWith(".onnx"));
+        .filter((f) => f.endsWith(".onnx"));
 
-      console.log(`📦 Loading ${modelFiles.length} ONNX models...\n`);
+      console.log(`📦 Loading ${onnxFiles.length} ONNX model(s)…\n`);
 
-      for (const file of modelFiles) {
-        const modelName = file.replace(".onnx", "");
-        const modelPath = path.join(this.modelsPath, file);
-
+      for (const file of onnxFiles) {
+        const name = file.replace(".onnx", "");
+        const fullPath = path.join(this.modelsPath, file);
         try {
-          const session = await ort.InferenceSession.create(modelPath);
-          this.models.set(modelName, session);
-          console.log(`  ✓ Loaded: ${modelName}`);
+          const session = await ort.InferenceSession.create(fullPath);
+          this.models.set(name, session);
+          console.log(`  ✓ ${name}`);
         } catch (err) {
-          console.error(`  ✗ Failed to load ${modelName}: ${err.message}`);
+          console.error(`  ✗ ${name}: ${err.message}`);
         }
       }
 
-      console.log(`\n✓ Loaded ${this.models.size} models`);
+      console.log(`\n✓ ${this.models.size} model(s) ready`);
       return true;
     } catch (err) {
-      console.error("❌ Model loading failed:", err);
+      console.error("❌ loadAllModels failed:", err.message);
       return false;
     }
   }
 
-  /* ============================================================
-   * LOAD METRICS
-   * ============================================================ */
+  /* ----------------------------------------------------------
+   * Load model_metrics.json
+   * ---------------------------------------------------------- */
   loadMetrics() {
-    const file = path.join(this.modelsPath, "model_metrics.json");
-
-    if (!fs.existsSync(file)) {
-      console.warn("⚠ model_metrics.json not found");
+    const filePath = path.join(this.modelsPath, "model_metrics.json");
+    if (!fs.existsSync(filePath)) {
+      console.warn("⚠  model_metrics.json not found");
       return null;
     }
-
-    this.metrics = JSON.parse(fs.readFileSync(file, "utf-8"));
+    this.metrics = JSON.parse(fs.readFileSync(filePath, "utf-8"));
     console.log("✓ Model metrics loaded");
     return this.metrics;
   }
 
-  /* ============================================================
-   * LOAD SCALER
-   * ============================================================ */
+  /* ----------------------------------------------------------
+   * Load scaler.json  (mean, scale, feature_names)
+   * ---------------------------------------------------------- */
   loadScaler() {
-    const file = path.join(this.modelsPath, "scaler.json");
-
-    if (!fs.existsSync(file)) {
-      console.warn("⚠ scaler.json not found");
+    const filePath = path.join(this.modelsPath, "scaler.json");
+    if (!fs.existsSync(filePath)) {
+      console.warn("⚠  scaler.json not found – inputs will NOT be scaled");
       return null;
     }
-
-    this.scalerStats = JSON.parse(fs.readFileSync(file, "utf-8"));
-    console.log("✓ Scaler loaded");
+    this.scalerStats = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    const n =
+      this.scalerStats.feature_names?.length ?? this.scalerStats.mean?.length;
+    console.log(
+      `✓ Scaler loaded  (${n} features: ${this.scalerStats.feature_names?.join(", ")})`,
+    );
     return this.scalerStats;
   }
 
-  /* ============================================================
-   * APPLY STANDARD SCALER
-   * ============================================================ */
-  applyScaling(features) {
-    if (!this.scalerStats) return features;
-
-    const { mean, scale } = this.scalerStats;
-    return features.map((v, i) => (v - mean[i]) / (scale[i] || 1));
-  }
-
-  /* ============================================================
-   * METADATA
-   * ============================================================ */
+  /* ----------------------------------------------------------
+   * Metadata helpers
+   * ---------------------------------------------------------- */
   getAvailableModels() {
     return Array.from(this.models.keys());
   }
-
-  getMetrics(modelName) {
-    return this.metrics?.[modelName] || null;
+  getMetrics(name) {
+    return this.metrics?.[name] ?? null;
   }
-
   getAllMetrics() {
-    return this.metrics || {};
+    return this.metrics ?? {};
   }
 
-  /* ============================================================
-   * RUN PREDICTION (ML + DL)
-   * ============================================================ */
-  async predict(modelName, features) {
-    const session = this.models.get(modelName);
-    if (!session) {
-      throw new Error(`Model not found: ${modelName}`);
+  /**
+   * The canonical feature list as saved by the Python preprocessor.
+   * Falls back to a generic numbered list if scaler.json has no names.
+   */
+  getFeatureNames() {
+    return (
+      this.scalerStats?.feature_names ??
+      Array.from(
+        { length: this.scalerStats?.mean?.length ?? 12 },
+        (_, i) => `feature_${i}`,
+      )
+    );
+  }
+
+  getFeatureCount() {
+    return this.scalerStats?.mean?.length ?? 12;
+  }
+
+  /* ----------------------------------------------------------
+   * Standard-scale a raw feature vector.
+   * Accepts either an ordered array or a key→value object.
+   * ---------------------------------------------------------- */
+  applyScaling(input) {
+    if (!this.scalerStats)
+      return Array.isArray(input) ? input : Object.values(input);
+
+    const { mean, scale, feature_names } = this.scalerStats;
+
+    let ordered;
+
+    if (Array.isArray(input)) {
+      // Assume caller already ordered the values correctly
+      ordered = input.map(Number);
+    } else {
+      // Object: reorder by feature_names, fill missing with column mean
+      ordered = feature_names.map((name, i) => {
+        const val = input[name];
+        return val !== undefined && val !== null ? Number(val) : mean[i];
+      });
     }
 
+    return ordered.map((v, i) => (v - mean[i]) / (scale[i] || 1));
+  }
+
+  /* ----------------------------------------------------------
+   * Run inference
+   * Accepts features as an ordered Array or as a name→value Object
+   * ---------------------------------------------------------- */
+  async predict(modelName, features) {
+    const session = this.models.get(modelName);
+    if (!session) throw new Error(`Model not found: ${modelName}`);
+
     try {
-      const numeric = features.map(Number);
-      const scaled = this.applyScaling(numeric);
-
+      const scaled = this.applyScaling(features);
       const inputName = session.inputNames[0];
-
       const inputShape = DEEP_MODELS.has(modelName)
-        ? [1, 1, scaled.length] // CNN / CNN-LSTM
-        : [1, scaled.length]; // Traditional ML
+        ? [1, 1, scaled.length]
+        : [1, scaled.length];
 
       const tensor = new ort.Tensor(
         "float32",
         Float32Array.from(scaled),
-        inputShape
+        inputShape,
       );
 
       const outputs = await session.run({ [inputName]: tensor });
-
       const outputKey = Object.keys(outputs)[0];
       const rawData = outputs[outputKey].data;
 
-      let prediction = null;
-      let probability = null;
+      let prediction, probability;
 
       if (rawData.length === 1) {
         probability = Number(rawData[0]);
         prediction = probability >= 0.5 ? 1 : 0;
-      } else if (rawData.length >= 2) {
+      } else {
         probability = Number(rawData[1]);
         prediction = probability >= 0.5 ? 1 : 0;
       }
@@ -181,6 +208,7 @@ class ModelLoader {
         probability,
         rawOutput: rawData,
         inputShape,
+        scaledInput: scaled,
       });
     } catch (err) {
       throw new Error(`Inference failed (${modelName}): ${err.message}`);

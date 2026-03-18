@@ -61,10 +61,10 @@ export function FLComparisonPanel() {
     );
   }
 
-  const chartData = Object.keys(comparison.centralized).map((model) => ({
+  const chartData = Object.keys(comparison.centralized || {}).map((model) => ({
     model: model.replace(/_/g, " ").toUpperCase(),
-    centralized: comparison.centralized[model].accuracy * 100,
-    federated: comparison.federated[model]?.accuracy * 100 || 0,
+    centralized: (comparison?.centralized?.[model]?.accuracy ?? 0) * 100,
+    federated: (comparison?.retrained?.[model]?.accuracy ?? 0) * 100,
   }));
 
   return (
@@ -140,8 +140,9 @@ export function FLComparisonPanel() {
             </thead>
             <tbody>
               {Object.keys(comparison.centralized).map((model) => {
-                const centAcc = comparison.centralized[model].accuracy * 100;
-                const fedAcc = comparison.federated[model]?.accuracy * 100 || 0;
+                const centAcc = comparison?.centralized[model]?.accuracy * 100;
+                const fedAcc =
+                  comparison?.retrained?.[model]?.accuracy * 100 || 0;
                 const diff = fedAcc - centAcc;
 
                 return (

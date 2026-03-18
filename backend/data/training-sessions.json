@@ -202,5 +202,273 @@
     },
     "error": null,
     "endTime": "2026-02-08T22:00:56.059Z"
+  },
+  "1773749443265": {
+    "sessionId": "1773749443265",
+    "modelType": "all",
+    "status": "training",
+    "startTime": "2026-03-17T12:10:43.265Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1773749443246-101208617.csv",
+    "progress": 0,
+    "currentMessage": "Training logistic_regression...",
+    "currentModel": "logistic_regression",
+    "results": {},
+    "error": null
+  },
+  "1773749477589": {
+    "sessionId": "1773749477589",
+    "modelType": "all",
+    "status": "completed",
+    "startTime": "2026-03-17T12:11:17.589Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1773749477578-910712444.csv",
+    "progress": 100,
+    "currentMessage": "All models trained!",
+    "currentModel": "cnn_lstm",
+    "results": {
+      "logistic_regression": {
+        "accuracy": 0.965,
+        "precision": 0.9661016949152542,
+        "recall": 0.9743589743589743,
+        "f1_score": 0.9702127659574468,
+        "auc_roc": 0.9963958397693338
+      },
+      "svm": {
+        "accuracy": 0.985,
+        "precision": 0.9830508474576272,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9872340425531915,
+        "auc_roc": 0.9978375038616003
+      },
+      "gradient_boost": {
+        "accuracy": 0.975,
+        "precision": 0.9827586206896551,
+        "recall": 0.9743589743589743,
+        "f1_score": 0.9785407725321889,
+        "auc_roc": 0.9981464318813716
+      },
+      "knn": {
+        "accuracy": 0.955,
+        "precision": 0.9736842105263158,
+        "recall": 0.9487179487179487,
+        "f1_score": 0.961038961038961,
+        "auc_roc": 0.9852744310575636
+      },
+      "cnn1d": {
+        "accuracy": 0.99,
+        "precision": 0.9914529914529915,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9914529914529915,
+        "auc_roc": 0.9995880959736381
+      },
+      "cnn_lstm": {
+        "accuracy": 0.975,
+        "precision": 0.9666666666666667,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9789029535864979,
+        "auc_roc": 0.9980434558747812
+      }
+    },
+    "error": null,
+    "endTime": "2026-03-17T12:12:58.459Z"
+  },
+  "1773749513543": {
+    "sessionId": "1773749513543",
+    "modelType": "all",
+    "status": "completed",
+    "startTime": "2026-03-17T12:11:53.543Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1773749513540-699495549.csv",
+    "progress": 100,
+    "currentMessage": "All models trained!",
+    "currentModel": "cnn_lstm",
+    "results": {
+      "logistic_regression": {
+        "accuracy": 0.965,
+        "precision": 0.9661016949152542,
+        "recall": 0.9743589743589743,
+        "f1_score": 0.9702127659574468,
+        "auc_roc": 0.9963958397693338
+      },
+      "svm": {
+        "accuracy": 0.985,
+        "precision": 0.9830508474576272,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9872340425531915,
+        "auc_roc": 0.9978375038616003
+      },
+      "gradient_boost": {
+        "accuracy": 0.975,
+        "precision": 0.9827586206896551,
+        "recall": 0.9743589743589743,
+        "f1_score": 0.9785407725321889,
+        "auc_roc": 0.9981464318813716
+      },
+      "knn": {
+        "accuracy": 0.955,
+        "precision": 0.9736842105263158,
+        "recall": 0.9487179487179487,
+        "f1_score": 0.961038961038961,
+        "auc_roc": 0.9852744310575636
+      },
+      "cnn1d": {
+        "accuracy": 0.99,
+        "precision": 0.9914529914529915,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9914529914529915,
+        "auc_roc": 0.9997940479868191
+      },
+      "cnn_lstm": {
+        "accuracy": 0.985,
+        "precision": 0.975,
+        "recall": 1,
+        "f1_score": 0.9873417721518988,
+        "auc_roc": 0.9976315518484193
+      }
+    },
+    "error": null,
+    "endTime": "2026-03-17T12:13:09.239Z"
+  },
+  "1773750249236": {
+    "sessionId": "1773750249236",
+    "modelType": "all",
+    "status": "completed",
+    "startTime": "2026-03-17T12:24:09.236Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1773750249232-983109311.csv",
+    "progress": 100,
+    "currentMessage": "All models trained!",
+    "currentModel": "cnn_lstm",
+    "results": {
+      "logistic_regression": {
+        "error": "Python script exited with code 2\npython: can't open file 'C:\\\\Users\\\\KMAP\\\\Desktop\\\\heart-disease-prediction\\\\backend\\\\python\\\\model_retrainer.py': [Errno 2] No such file or directory\r\n"
+      },
+      "svm": {
+        "error": "Python script exited with code 2\npython: can't open file 'C:\\\\Users\\\\KMAP\\\\Desktop\\\\heart-disease-prediction\\\\backend\\\\python\\\\model_retrainer.py': [Errno 2] No such file or directory\r\n"
+      },
+      "gradient_boost": {
+        "error": "Python script exited with code 2\npython: can't open file 'C:\\\\Users\\\\KMAP\\\\Desktop\\\\heart-disease-prediction\\\\backend\\\\python\\\\model_retrainer.py': [Errno 2] No such file or directory\r\n"
+      },
+      "knn": {
+        "error": "Python script exited with code 2\npython: can't open file 'C:\\\\Users\\\\KMAP\\\\Desktop\\\\heart-disease-prediction\\\\backend\\\\python\\\\model_retrainer.py': [Errno 2] No such file or directory\r\n"
+      },
+      "cnn1d": {
+        "error": "Python script exited with code 2\npython: can't open file 'C:\\\\Users\\\\KMAP\\\\Desktop\\\\heart-disease-prediction\\\\backend\\\\python\\\\model_retrainer.py': [Errno 2] No such file or directory\r\n"
+      },
+      "cnn_lstm": {
+        "error": "Python script exited with code 2\npython: can't open file 'C:\\\\Users\\\\KMAP\\\\Desktop\\\\heart-disease-prediction\\\\backend\\\\python\\\\model_retrainer.py': [Errno 2] No such file or directory\r\n"
+      }
+    },
+    "error": null,
+    "endTime": "2026-03-17T12:24:11.210Z"
+  },
+  "1773750285343": {
+    "sessionId": "1773750285343",
+    "modelType": "all",
+    "status": "completed",
+    "startTime": "2026-03-17T12:24:45.343Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1773750285337-876772721.csv",
+    "progress": 100,
+    "currentMessage": "All models trained!",
+    "currentModel": "cnn_lstm",
+    "results": {
+      "logistic_regression": {
+        "accuracy": 0.965,
+        "precision": 0.9661016949152542,
+        "recall": 0.9743589743589743,
+        "f1_score": 0.9702127659574468,
+        "auc_roc": 0.9963958397693338
+      },
+      "svm": {
+        "accuracy": 0.985,
+        "precision": 0.9830508474576272,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9872340425531915,
+        "auc_roc": 0.9978375038616003
+      },
+      "gradient_boost": {
+        "accuracy": 0.975,
+        "precision": 0.9827586206896551,
+        "recall": 0.9743589743589743,
+        "f1_score": 0.9785407725321889,
+        "auc_roc": 0.9981464318813716
+      },
+      "knn": {
+        "accuracy": 0.955,
+        "precision": 0.9736842105263158,
+        "recall": 0.9487179487179487,
+        "f1_score": 0.961038961038961,
+        "auc_roc": 0.9852744310575636
+      },
+      "cnn1d": {
+        "accuracy": 0.985,
+        "precision": 0.9830508474576272,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9872340425531915,
+        "auc_roc": 0.9993821439604572
+      },
+      "cnn_lstm": {
+        "accuracy": 0.975,
+        "precision": 0.9666666666666667,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9789029535864979,
+        "auc_roc": 0.9971166718154669
+      }
+    },
+    "error": null,
+    "endTime": "2026-03-17T12:26:12.122Z"
+  },
+  "1773750319381": {
+    "sessionId": "1773750319381",
+    "modelType": "all",
+    "status": "completed",
+    "startTime": "2026-03-17T12:25:19.381Z",
+    "dataPath": "C:\\Users\\KMAP\\Desktop\\heart-disease-prediction\\backend\\uploads\\dataset-1773750319378-359135538.csv",
+    "progress": 100,
+    "currentMessage": "All models trained!",
+    "currentModel": "cnn_lstm",
+    "results": {
+      "logistic_regression": {
+        "accuracy": 0.965,
+        "precision": 0.9661016949152542,
+        "recall": 0.9743589743589743,
+        "f1_score": 0.9702127659574468,
+        "auc_roc": 0.9963958397693338
+      },
+      "svm": {
+        "accuracy": 0.985,
+        "precision": 0.9830508474576272,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9872340425531915,
+        "auc_roc": 0.9978375038616003
+      },
+      "gradient_boost": {
+        "accuracy": 0.975,
+        "precision": 0.9827586206896551,
+        "recall": 0.9743589743589743,
+        "f1_score": 0.9785407725321889,
+        "auc_roc": 0.9981464318813716
+      },
+      "knn": {
+        "accuracy": 0.955,
+        "precision": 0.9736842105263158,
+        "recall": 0.9487179487179487,
+        "f1_score": 0.961038961038961,
+        "auc_roc": 0.9852744310575636
+      },
+      "cnn1d": {
+        "accuracy": 0.99,
+        "precision": 0.9914529914529915,
+        "recall": 0.9914529914529915,
+        "f1_score": 0.9914529914529915,
+        "auc_roc": 0.9992791679538667
+      },
+      "cnn_lstm": {
+        "accuracy": 0.975,
+        "precision": 0.9590163934426229,
+        "recall": 1,
+        "f1_score": 0.9790794979079498,
+        "auc_roc": 0.9960869117495624
+      }
+    },
+    "error": null,
+    "endTime": "2026-03-17T12:26:42.152Z"
   }
 }

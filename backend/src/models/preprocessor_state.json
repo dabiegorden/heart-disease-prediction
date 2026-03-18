@@ -1,0 +1,58 @@
+{
+  "feature_names": [
+    "age",
+    "chest_pain_type",
+    "cholesterol",
+    "exercise_angina",
+    "fasting_blood_sugar",
+    "max_heart_rate",
+    "num_major_vessels",
+    "oldpeak",
+    "resting_bp",
+    "resting_ecg",
+    "sex",
+    "slope"
+  ],
+  "scaler_mean": [
+    49.242,
+    0.765,
+    0.98,
+    151.747,
+    311.447,
+    0.296,
+    0.748,
+    145.477,
+    0.498,
+    2.7077,
+    1.54,
+    1.222
+  ],
+  "scaler_scale": [
+    17.8557955857475,
+    0.42399882075307715,
+    0.9526804291051644,
+    29.950241918889404,
+    132.37756301956915,
+    0.45649096376598736,
+    0.7697376176334376,
+    34.173168875595955,
+    0.4999959999839998,
+    1.7198926449054894,
+    1.0031948963187562,
+    0.9770956964391974
+  ],
+  "col_means": {
+    "age": 49.242,
+    "sex": 0.765,
+    "chest_pain_type": 0.98,
+    "resting_bp": 151.747,
+    "cholesterol": 311.447,
+    "fasting_blood_sugar": 0.296,
+    "resting_ecg": 0.748,
+    "max_heart_rate": 145.477,
+    "exercise_angina": 0.498,
+    "oldpeak": 2.7077,
+    "slope": 1.54,
+    "num_major_vessels": 1.222
+  }
+}

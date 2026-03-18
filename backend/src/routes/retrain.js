@@ -1,6 +1,18 @@
 /**
- * Model Retraining Routes
- * Simplified API for clients to retrain models with their own datasets
+ * routes/retrain.js
+ * =================
+ * Model retraining endpoints.
+ *
+ * Changes from original
+ * ---------------------
+ * 1. Training sessions are persisted to MongoDB (TrainingSession collection)
+ *    instead of a flat JSON file.
+ * 2. After a successful run the model's metrics are upserted in the
+ *    ModelMetrics collection.
+ * 3. File uploads now accept CSV **and** Excel (.xlsx / .xls) because the
+ *    Python preprocessor handles both formats.
+ * 4. The `multer` filename preserves the original extension so the Python
+ *    script can detect the file format correctly.
  */
 
 import express from "express";
@@ -10,78 +22,114 @@ import { fileURLToPath } from "url";
 import multer from "multer";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import { executePythonScript } from "../utils/python-executor.js";
+import { TrainingSession, ModelMetrics } from "../db/schema.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const apiRoot = path.resolve(__dirname, "../..");
 
-const SESSIONS_FILE = path.join(apiRoot, "data", "training-sessions.json");
+const ALLOWED_EXTENSIONS = new Set([".csv", ".xlsx", ".xls"]);
+const ALLOWED_MIMETYPES = new Set([
+  "text/csv",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+]);
 
-// Configure multer for file uploads
+/* ============================================================
+ * MULTER – preserve original extension
+ * ============================================================ */
 const storage = multer.diskStorage({
-  destination: async (req, file, cb) => {
+  destination: async (_req, _file, cb) => {
     const uploadDir = path.join(apiRoot, "uploads");
     await fs.mkdir(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, `dataset-${uniqueSuffix}.csv`);
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `dataset-${unique}${ext}`);
   },
 });
 
 const upload = multer({
   storage,
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === "text/csv" || file.originalname.endsWith(".csv")) {
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ALLOWED_EXTENSIONS.has(ext) || ALLOWED_MIMETYPES.has(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Only CSV files are allowed"));
+      cb(
+        new Error("Only CSV and Excel files (.csv, .xlsx, .xls) are accepted."),
+      );
     }
   },
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
 });
 
-async function loadSessions() {
-  try {
-    const dataDir = path.dirname(SESSIONS_FILE);
-    await fs.mkdir(dataDir, { recursive: true });
+const VALID_MODELS = [
+  "logistic_regression",
+  "svm",
+  "gradient_boost",
+  "knn",
+  "cnn1d",
+  "cnn_lstm",
+];
 
-    const data = await fs.readFile(SESSIONS_FILE, "utf-8");
-    const sessions = JSON.parse(data);
-    return new Map(Object.entries(sessions));
-  } catch (error) {
-    // File doesn't exist or is invalid, return empty Map
-    return new Map();
+/* ============================================================
+ * Helpers
+ * ============================================================ */
+
+/** Persist (or update) a TrainingSession document */
+async function upsertSession(data) {
+  try {
+    await TrainingSession.findOneAndUpdate(
+      { sessionId: data.sessionId },
+      { $set: data },
+      { upsert: true, new: true },
+    );
+  } catch (err) {
+    console.error("[MongoDB] Failed to save session:", err.message);
   }
 }
 
-async function saveSessions(trainingSessions) {
+/** Upsert per-model metrics after successful training */
+async function upsertMetrics(modelName, metrics, source = "retrained") {
   try {
-    const dataDir = path.dirname(SESSIONS_FILE);
-    await fs.mkdir(dataDir, { recursive: true });
-
-    const sessions = Object.fromEntries(trainingSessions);
-    await fs.writeFile(SESSIONS_FILE, JSON.stringify(sessions, null, 2));
-  } catch (error) {
-    console.error("[v0] Failed to save sessions:", error);
+    await ModelMetrics.findOneAndUpdate(
+      { modelName },
+      { $set: { ...metrics, modelName, source, trainedAt: new Date() } },
+      { upsert: true, new: true },
+    );
+  } catch (err) {
+    console.error("[MongoDB] Failed to save metrics:", err.message);
   }
 }
 
+/** Parse the TRAINING COMPLETE JSON block from Python stdout */
+function parseTrainingResult(stdout) {
+  const lines = stdout.split("\n");
+  const completeIdx = lines.findIndex((l) =>
+    l.includes("=== TRAINING COMPLETE ==="),
+  );
+  if (completeIdx === -1)
+    throw new Error("Training completed but no results block found.");
+  const jsonText = lines
+    .slice(completeIdx + 1)
+    .join("\n")
+    .trim();
+  return JSON.parse(jsonText);
+}
+
+/* ============================================================
+ * ROUTER FACTORY
+ * ============================================================ */
 export default function createRetrainRouter() {
   const router = express.Router();
 
-  let trainingSessions = new Map();
-
-  loadSessions().then((sessions) => {
-    trainingSessions = sessions;
-    console.log(`[v0] Loaded ${sessions.size} training sessions from disk`);
-  });
-
-  /* ============================================================
+  /* ----------------------------------------------------------
    * POST /api/retrain/upload
-   * Upload dataset and retrain a specific model
-   * ============================================================ */
+   * Retrain one model with an uploaded dataset
+   * ---------------------------------------------------------- */
   router.post(
     "/upload",
     upload.single("dataset"),
@@ -89,40 +137,21 @@ export default function createRetrainRouter() {
       const { modelType, epochs = "50" } = req.body;
 
       if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          error: "No dataset file uploaded",
-        });
+        return res
+          .status(400)
+          .json({ success: false, error: "No dataset file uploaded." });
       }
-
       if (!modelType) {
+        return res
+          .status(400)
+          .json({ success: false, error: "modelType is required." });
+      }
+      if (!VALID_MODELS.includes(modelType)) {
         return res.status(400).json({
           success: false,
-          error: "Model type is required",
+          error: `Invalid modelType. Must be one of: ${VALID_MODELS.join(", ")}`,
         });
       }
-
-      const validModels = [
-        "logistic_regression",
-        "svm",
-        "gradient_boost",
-        "knn",
-        "cnn1d",
-        "cnn_lstm",
-      ];
-
-      if (!validModels.includes(modelType)) {
-        return res.status(400).json({
-          success: false,
-          error: `Invalid model type. Must be one of: ${validModels.join(
-            ", ",
-          )}`,
-        });
-      }
-
-      console.log(`[Retrain] Received dataset: ${req.file.filename}`);
-      console.log(`[Retrain] Model type: ${modelType}`);
-      console.log(`[Retrain] File size: ${req.file.size} bytes`);
 
       const sessionId = Date.now().toString();
       const dataPath = req.file.path;
@@ -132,164 +161,30 @@ export default function createRetrainRouter() {
         sessionId,
         modelType,
         status: "training",
-        startTime: new Date().toISOString(),
-        dataPath,
+        startTime: new Date(),
+        originalFilename: req.file.originalname,
+        fileSizeBytes: req.file.size,
         progress: 10,
-        currentMessage: "Initializing...",
+        currentMessage: "Initializing…",
         metrics: null,
         error: null,
       };
 
-      trainingSessions.set(sessionId, session);
-      await saveSessions(trainingSessions);
+      await upsertSession(session);
 
+      // Respond immediately so the client can poll /status/:sessionId
       res.json({
         success: true,
         sessionId,
-        message: `Training ${modelType} model started`,
+        message: `Training ${modelType} started`,
         modelType,
       });
 
+      // ── Background training ────────────────────────────────
       try {
-        console.log(`[v0] Starting training for ${modelType}`);
-        console.log(`[v0] Data path: ${dataPath}`);
-        console.log(`[v0] Output dir: ${outputDir}`);
-
-        const args = [
-          "--model-type",
-          modelType,
-          "--data-path",
-          dataPath,
-          "--output-dir",
-          outputDir,
-          "--epochs",
-          epochs,
-        ];
-
-        const result = await executePythonScript("model_retrainer.py", args, {
-          onProgress: async (percentage, message) => {
-            console.log(`[v0] Training progress: ${percentage}% - ${message}`);
-            session.progress = Math.max(session.progress, percentage);
-            session.currentMessage = message || "Training...";
-            await saveSessions(trainingSessions);
-          },
-        });
-
-        console.log(`[v0] Training output:`, result.stdout);
-
-        const lines = result.stdout.split("\n");
-        const completeIdx = lines.findIndex((line) =>
-          line.includes("=== TRAINING COMPLETE ==="),
-        );
-
-        if (completeIdx !== -1) {
-          const jsonLines = lines
-            .slice(completeIdx + 1)
-            .join("\n")
-            .trim();
-          const trainingResult = JSON.parse(jsonLines);
-
-          session.status = "completed";
-          session.endTime = new Date().toISOString();
-          session.metrics = trainingResult.metrics;
-          session.progress = 100;
-          session.currentMessage = "Training completed!";
-
-          console.log(
-            `[v0] Training completed for ${modelType}:`,
-            trainingResult.metrics,
-          );
-        } else {
-          throw new Error("Training completed but no results found");
-        }
-      } catch (error) {
-        console.error(`[v0] Training failed for ${modelType}:`, error);
-        session.status = "failed";
-        session.error = error.message;
-        session.endTime = new Date().toISOString();
-        session.progress = 0;
-        session.currentMessage = `Failed: ${error.message}`;
-      } finally {
-        await saveSessions(trainingSessions);
-
-        try {
-          await fs.unlink(dataPath);
-        } catch (err) {
-          console.warn(`[v0] Failed to delete uploaded file: ${dataPath}`);
-        }
-      }
-    }),
-  );
-
-  /* ============================================================
-   * POST /api/retrain/train-all
-   * Train all 6 models with uploaded dataset
-   * ============================================================ */
-  router.post(
-    "/train-all",
-    upload.single("dataset"),
-    asyncHandler(async (req, res) => {
-      const { epochs = "50" } = req.body;
-
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          error: "No dataset file uploaded",
-        });
-      }
-
-      console.log(`[Retrain All] Received dataset: ${req.file.filename}`);
-
-      const sessionId = Date.now().toString();
-      const dataPath = req.file.path;
-      const outputDir = path.join(process.cwd(), "models", "retrained");
-      const models = [
-        "logistic_regression",
-        "svm",
-        "gradient_boost",
-        "knn",
-        "cnn1d",
-        "cnn_lstm",
-      ];
-
-      const session = {
-        sessionId,
-        modelType: "all",
-        status: "training",
-        startTime: new Date().toISOString(),
-        dataPath,
-        progress: 0,
-        currentMessage: "Starting...",
-        currentModel: null,
-        results: {},
-        error: null,
-      };
-
-      trainingSessions.set(sessionId, session);
-      await saveSessions(trainingSessions);
-
-      res.json({
-        success: true,
-        sessionId,
-        message: "Training all 6 models started",
-        totalModels: models.length,
-      });
-
-      let completedCount = 0;
-
-      for (const modelType of models) {
-        session.currentModel = modelType;
-        session.currentMessage = `Training ${modelType}...`;
-        await saveSessions(trainingSessions);
-
-        try {
-          console.log(
-            `[v0] Training ${modelType} (${completedCount + 1}/${
-              models.length
-            })`,
-          );
-
-          const args = [
+        const result = await executePythonScript(
+          "model_retrainer.py",
+          [
             "--model-type",
             modelType,
             "--data-path",
@@ -298,133 +193,215 @@ export default function createRetrainRouter() {
             outputDir,
             "--epochs",
             epochs,
-          ];
-
-          const result = await executePythonScript("model_retrainer.py", args, {
-            onProgress: async (percentage, message) => {
-              const baseProgress = (completedCount / models.length) * 100;
-              const modelProgress = percentage / models.length;
-              session.progress = Math.round(baseProgress + modelProgress);
-              session.currentMessage = `${modelType}: ${message}`;
-              await saveSessions(trainingSessions);
+          ],
+          {
+            onProgress: async (pct, msg) => {
+              await upsertSession({
+                sessionId,
+                progress: Math.max(session.progress, pct),
+                currentMessage: msg || "Training…",
+              });
             },
-          });
+          },
+        );
 
-          const lines = result.stdout.split("\n");
-          const completeIdx = lines.findIndex((line) =>
-            line.includes("=== TRAINING COMPLETE ==="),
-          );
+        const trainingResult = parseTrainingResult(result.stdout);
 
-          if (completeIdx !== -1) {
-            const jsonLines = lines
-              .slice(completeIdx + 1)
-              .join("\n")
-              .trim();
-            const trainingResult = JSON.parse(jsonLines);
-            session.results[modelType] = trainingResult.metrics;
-
-            console.log(`[v0] Completed ${modelType}:`, trainingResult.metrics);
-          } else {
-            session.results[modelType] = { error: "No results found" };
-          }
-
-          completedCount++;
-          session.progress = Math.round((completedCount / models.length) * 100);
-          session.currentMessage = `Completed ${modelType}`;
-          await saveSessions(trainingSessions);
-        } catch (error) {
-          console.error(`[v0] Failed ${modelType}:`, error.message);
-          session.results[modelType] = { error: error.message };
-          completedCount++;
-          session.progress = Math.round((completedCount / models.length) * 100);
-          session.currentMessage = `Failed ${modelType}: ${error.message}`;
-          await saveSessions(trainingSessions);
-        }
-      }
-
-      session.status = "completed";
-      session.endTime = new Date().toISOString();
-      session.currentMessage = "All models trained!";
-      await saveSessions(trainingSessions);
-
-      try {
-        await fs.unlink(dataPath);
+        const completed = {
+          sessionId,
+          status: "completed",
+          endTime: new Date(),
+          metrics: trainingResult.metrics,
+          numSamples: trainingResult.num_samples,
+          numFeatures: trainingResult.num_features,
+          featureNames: trainingResult.feature_names,
+          progress: 100,
+          currentMessage: "Training complete!",
+        };
+        await upsertSession(completed);
+        await upsertMetrics(modelType, trainingResult.metrics);
       } catch (err) {
-        console.warn(`[v0] Failed to delete uploaded file: ${dataPath}`);
+        console.error(`[Retrain] ${modelType} failed:`, err.message);
+        await upsertSession({
+          sessionId,
+          status: "failed",
+          endTime: new Date(),
+          error: err.message,
+          progress: 0,
+          currentMessage: `Failed: ${err.message}`,
+        });
+      } finally {
+        fs.unlink(dataPath).catch(() => {});
       }
-
-      console.log(`[v0] All models training completed`);
     }),
   );
 
-  /* ============================================================
-   * GET /api/retrain/status/:sessionId
-   * Get training status
-   * ============================================================ */
-  router.get(
-    "/status/:sessionId",
+  /* ----------------------------------------------------------
+   * POST /api/retrain/train-all
+   * Retrain all 6 models sequentially with one uploaded dataset
+   * ---------------------------------------------------------- */
+  router.post(
+    "/train-all",
+    upload.single("dataset"),
     asyncHandler(async (req, res) => {
-      const { sessionId } = req.params;
+      const { epochs = "50" } = req.body;
 
-      const session = trainingSessions.get(sessionId);
-
-      if (!session) {
-        return res.status(404).json({
-          success: false,
-          error: "Training session not found",
-        });
+      if (!req.file) {
+        return res
+          .status(400)
+          .json({ success: false, error: "No dataset file uploaded." });
       }
+
+      const sessionId = Date.now().toString();
+      const dataPath = req.file.path;
+      const outputDir = path.join(process.cwd(), "models", "retrained");
+
+      const session = {
+        sessionId,
+        modelType: "all",
+        status: "training",
+        startTime: new Date(),
+        originalFilename: req.file.originalname,
+        fileSizeBytes: req.file.size,
+        progress: 0,
+        currentMessage: "Starting…",
+        currentModel: null,
+        results: {},
+        error: null,
+      };
+
+      await upsertSession(session);
 
       res.json({
         success: true,
-        session,
+        sessionId,
+        message: "Training all 6 models started",
+        totalModels: VALID_MODELS.length,
       });
+
+      // ── Sequential training loop ───────────────────────────
+      let completed = 0;
+
+      for (const modelType of VALID_MODELS) {
+        await upsertSession({
+          sessionId,
+          currentModel: modelType,
+          currentMessage: `Training ${modelType}…`,
+        });
+
+        try {
+          const result = await executePythonScript(
+            "model_retrainer.py",
+            [
+              "--model-type",
+              modelType,
+              "--data-path",
+              dataPath,
+              "--output-dir",
+              outputDir,
+              "--epochs",
+              epochs,
+            ],
+            {
+              onProgress: async (pct, msg) => {
+                const base = (completed / VALID_MODELS.length) * 100;
+                await upsertSession({
+                  sessionId,
+                  progress: Math.round(base + pct / VALID_MODELS.length),
+                  currentMessage: `${modelType}: ${msg}`,
+                });
+              },
+            },
+          );
+
+          const trainingResult = parseTrainingResult(result.stdout);
+          session.results[modelType] = trainingResult.metrics;
+          await upsertMetrics(modelType, trainingResult.metrics);
+        } catch (err) {
+          console.error(`[Retrain-All] ${modelType} failed:`, err.message);
+          session.results[modelType] = { error: err.message };
+        }
+
+        completed++;
+        await upsertSession({
+          sessionId,
+          results: { ...session.results },
+          progress: Math.round((completed / VALID_MODELS.length) * 100),
+          currentMessage: `Completed ${modelType}`,
+        });
+      }
+
+      await upsertSession({
+        sessionId,
+        status: "completed",
+        endTime: new Date(),
+        currentMessage: "All models trained!",
+        results: session.results,
+      });
+
+      fs.unlink(dataPath).catch(() => {});
+      console.log("[Retrain-All] Done");
     }),
   );
 
-  /* ============================================================
+  /* ----------------------------------------------------------
+   * GET /api/retrain/status/:sessionId
+   * ---------------------------------------------------------- */
+  router.get(
+    "/status/:sessionId",
+    asyncHandler(async (req, res) => {
+      const session = await TrainingSession.findOne({
+        sessionId: req.params.sessionId,
+      }).lean();
+
+      if (!session) {
+        return res
+          .status(404)
+          .json({ success: false, error: "Session not found." });
+      }
+
+      res.json({ success: true, session });
+    }),
+  );
+
+  /* ----------------------------------------------------------
    * GET /api/retrain/results
-   * Get all training results
-   * ============================================================ */
+   * All completed sessions
+   * ---------------------------------------------------------- */
   router.get(
     "/results",
     asyncHandler(async (req, res) => {
-      const sessions = Array.from(trainingSessions.values());
-      const completed = sessions.filter((s) => s.status === "completed");
-
-      console.log(`[v0] Returning ${completed.length} completed sessions`);
+      const limit = Math.min(parseInt(req.query.limit ?? "50", 10), 200);
+      const sessions = await TrainingSession.find({ status: "completed" })
+        .sort({ endTime: -1 })
+        .limit(limit)
+        .lean();
 
       res.json({
         success: true,
         total: sessions.length,
-        completed: completed.length,
-        sessions: completed,
+        sessions,
       });
     }),
   );
 
-  /* ============================================================
+  /* ----------------------------------------------------------
    * DELETE /api/retrain/sessions/:sessionId
-   * Delete a training session
-   * ============================================================ */
+   * ---------------------------------------------------------- */
   router.delete(
     "/sessions/:sessionId",
     asyncHandler(async (req, res) => {
-      const { sessionId } = req.params;
+      const result = await TrainingSession.deleteOne({
+        sessionId: req.params.sessionId,
+      });
 
-      if (trainingSessions.has(sessionId)) {
-        trainingSessions.delete(sessionId);
-        await saveSessions(trainingSessions);
-        res.json({
-          success: true,
-          message: "Session deleted",
-        });
-      } else {
-        res.status(404).json({
-          success: false,
-          error: "Session not found",
-        });
+      if (result.deletedCount === 0) {
+        return res
+          .status(404)
+          .json({ success: false, error: "Session not found." });
       }
+
+      res.json({ success: true, message: "Session deleted." });
     }),
   );
 

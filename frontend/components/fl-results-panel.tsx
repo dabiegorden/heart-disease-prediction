@@ -30,7 +30,7 @@ export function FLResultsPanel() {
       console.log("[v0] Results data:", data);
 
       if (data.success && data.sessions.length > 0) {
-        const latestSession = data.sessions[data.sessions.length - 1];
+        const latestSession = data.sessions[0];
         console.log("[v0] Latest session:", latestSession);
         setResults(latestSession);
       } else {
@@ -81,8 +81,12 @@ export function FLResultsPanel() {
     const modelStr = String(modelName);
     const metrics =
       results.modelType === "all"
-        ? results.results[modelName]
+        ? results.results?.[modelName]
         : results.metrics;
+
+    if (!results || results.status !== "completed") {
+      return null;
+    }
 
     // Skip if metrics are missing or contain errors
     if (!metrics || metrics.error) {
@@ -94,6 +98,8 @@ export function FLResultsPanel() {
         f1_score: 0,
       };
     }
+
+    if (!metrics) return null;
 
     return {
       name: modelStr.replace(/_/g, " ").toUpperCase(),

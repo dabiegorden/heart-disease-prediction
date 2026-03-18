@@ -1,5 +1,13 @@
 /**
- * Express Server – Heart Disease Prediction API
+ * server.js  –  Heart Disease Prediction API
+ * ===========================================
+ * Changes from original
+ * ---------------------
+ * 1. /api/info reads featureNames + featureCount dynamically from the loaded
+ *    scaler so it stays correct after any retraining run.
+ * 2. connectDB is called before app.listen so DB errors surface early.
+ * 3. ModelMetrics collection is seeded with the initial model_metrics.json
+ *    on first boot (if no records exist yet).
  */
 
 import express from "express";
@@ -8,14 +16,16 @@ import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
+import fs from "fs";
 
 import ModelLoader from "./utils/modelLoader.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { createPredictRouter } from "./routes/predict.js";
-import federatedRouter from "./routes/federated.js";
+import createFederatedRouter from "./routes/federated.js";
 import createRetrainRouter from "./routes/retrain.js";
 import explainableAIRouter from "./routes/explainable-ai.js";
 import { connectDB } from "./config/mongodb.js";
+import { ModelMetrics } from "./db/schema.js";
 
 dotenv.config();
 
@@ -33,7 +43,6 @@ app.use(
     credentials: true,
   }),
 );
-
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
@@ -42,35 +51,72 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
  * ============================================================ */
 const modelsPath =
   process.env.MODELS_PATH || path.join(__dirname, "../src/models");
-
 const modelLoader = new ModelLoader(modelsPath);
 let modelsReady = false;
 
 async function initializeModels() {
-  console.log("🚀 Initializing ONNX model loader...");
+  console.log("🚀 Initializing ONNX model loader…");
 
-  const loaded = await modelLoader.loadAllModels();
+  await modelLoader.loadAllModels();
   modelLoader.loadMetrics();
   modelLoader.loadScaler();
 
-  const models = modelLoader.getAvailableModels();
+  const available = modelLoader.getAvailableModels();
 
-  if (!loaded || models.length === 0) {
+  if (available.length === 0) {
     console.error("❌ No ONNX models loaded — predictions will fail.");
   } else {
-    console.log(`✓ Loaded ${models.length} models:`, models);
+    console.log(
+      `✓ Loaded ${available.length} model(s): ${available.join(", ")}`,
+    );
   }
 
   modelsReady = true;
   console.log("✓ Model initialization complete.\n");
 }
 
-await initializeModels();
+/**
+ * On first boot, seed the ModelMetrics collection from model_metrics.json
+ * so the /comparison endpoint has data without requiring a retrain.
+ */
+async function seedInitialMetrics() {
+  try {
+    const count = await ModelMetrics.countDocuments({});
+    if (count > 0) return; // already seeded
+
+    const metricsFile = path.join(modelsPath, "model_metrics.json");
+    if (!fs.existsSync(metricsFile)) return;
+
+    const raw = JSON.parse(fs.readFileSync(metricsFile, "utf-8"));
+    const records = Object.entries(raw).map(([modelName, m]) => ({
+      modelName,
+      source: "initial",
+      accuracy: m.accuracy,
+      precision: m.precision,
+      recall: m.recall,
+      f1: m.f1,
+      f1_score: m.f1_score,
+      auc: m.auc,
+      auc_roc: m.auc_roc,
+      cv_mean: m.cv_mean,
+      cv_std: m.cv_std,
+      confusion_matrix: m.confusion_matrix,
+      trainedAt: new Date(),
+    }));
+
+    await ModelMetrics.insertMany(records, { ordered: false });
+    console.log(
+      `✓ Seeded ${records.length} initial model metrics into MongoDB`,
+    );
+  } catch (err) {
+    console.warn("⚠  Could not seed initial metrics:", err.message);
+  }
+}
 
 /* ============================================================
  * HEALTH CHECK
  * ============================================================ */
-app.get("/health", (req, res) => {
+app.get("/health", (_req, res) => {
   res.json({
     status: modelsReady ? "ok" : "initializing",
     modelsReady,
@@ -81,74 +127,58 @@ app.get("/health", (req, res) => {
 });
 
 /* ============================================================
- * PREDICTION ROUTES
+ * ROUTES
  * ============================================================ */
 app.use("/api/predict", createPredictRouter(modelLoader));
-app.use("/api/federated", federatedRouter);
+app.use("/api/federated", createFederatedRouter());
 app.use("/api/retrain", createRetrainRouter());
 app.use("/api/explainable-ai", explainableAIRouter);
 
 /* ============================================================
- * API INFO
+ * API INFO  –  feature list is read from the loaded scaler
  * ============================================================ */
-app.get("/api/info", (req, res) => {
+app.get("/api/info", (_req, res) => {
   const models = modelLoader.getAvailableModels();
-
-  const modelDetails = models.map((name) => ({
-    name,
-    type: name.includes("cnn") ? "deep-learning" : "machine-learning",
-  }));
 
   res.json({
     name: "Heart Disease Prediction API",
-    version: "1.1.0",
-    models: modelDetails,
-    featureCount: 12,
-    featureNames: [
-      "age",
-      "sex",
-      "chestpaintype",
-      "restingbps",
-      "cholesterol",
-      "fastingbloodsugar",
-      "restingecg",
-      "maxheartrate",
-      "exerciseangina",
-      "oldpeak",
-      "slope",
-      "noofmajorvessels",
-    ],
+    version: "1.2.0",
+    models: models.map((name) => ({
+      name,
+      type: name.includes("cnn") ? "deep-learning" : "machine-learning",
+    })),
+    featureCount: modelLoader.getFeatureCount(),
+    featureNames: modelLoader.getFeatureNames(),
   });
 });
 
 /* ============================================================
- * 404 HANDLER
+ * 404 / ERROR HANDLERS
  * ============================================================ */
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: "Endpoint Not Found",
-    path: req.path,
-  });
+  res
+    .status(404)
+    .json({ success: false, error: "Endpoint not found", path: req.path });
 });
 
-/* ============================================================
- * GLOBAL ERROR HANDLER
- * ============================================================ */
 app.use(errorHandler);
 
 /* ============================================================
- * START SERVER
+ * START
  * ============================================================ */
-app.listen(PORT, async () => {
-  await connectDB();
+await connectDB();
+await initializeModels();
+await seedInitialMetrics();
+
+app.listen(PORT, () => {
   console.log(`
 ╔══════════════════════════════════════════════════╗
 ║   🏥 HEART DISEASE PREDICTION API
 ║
-║   ➤ Server: http://localhost:${PORT}
-║   ➤ Models Loaded: ${modelLoader.getAvailableModels().length}
-║   ➤ Scaler Loaded: ${modelLoader.scalerStats ? "Yes" : "No"}
+║   ➤ Server  : http://localhost:${PORT}
+║   ➤ Models  : ${modelLoader.getAvailableModels().length} loaded
+║   ➤ Features: ${modelLoader.getFeatureCount()} (${modelLoader.getFeatureNames().join(", ")})
+║   ➤ Scaler  : ${modelLoader.scalerStats ? "✓" : "✗ not loaded"}
 ║
 ╚══════════════════════════════════════════════════╝
 `);
